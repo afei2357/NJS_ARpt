@@ -1,0 +1,50 @@
+{
+ "sample_code": "S2302030001", 
+ "files": {
+  "example_file": "http://baidu.com/xxx.xlsx"
+ },
+ "info": {
+  "project_id": 2, 
+  "project_name": "尿结石风险筛查", 
+  "account_id": 1,
+
+  "tested_user_id": 1,
+  "bar_code_no": "S2302030001",
+  "medical_card_no": "", 
+  "name": "张三",
+  "mobile": "13344445555", 
+  "birthday": "2023-02-03",
+  "gender": 1, 
+  "gender_desc": "男", 
+  "highest_education": "大学", 
+  "ethnicity": "汉族", 
+  "native_place": "北京",
+  "birth_place": "北京",
+  "height": "123", 
+  "weight": "50",
+  "remark": "",
+  "age_text":"23",
+  
+  "test_order_id": 1,
+  "sample_id": 1,
+  "sampling_time": "2023-02-03",
+  "receiving_time": "2023-02-03",
+  "test_time":"2023-02-05",
+  "submitting_organization": "河间妇幼",
+  "department_name": "",
+  "doctor_name": "",
+
+  "place_of_residence": "", 
+
+  "daily_drink_water_num": "",
+  "is_urinary_stone": "",
+  "age_of_initial_diagnosis": 12,
+  "return_visit_num": 0,
+  "last_relapse_time": "2023-02-03",
+  "return_visit_num": 0,
+  "urinary_store_type": "xxx",
+  "urinary_store_type_desc": "xxx",
+  "urinary_store_type_other_desc": "xxx",
+  "other_basic_diseases": "xxx"
+ }
+}

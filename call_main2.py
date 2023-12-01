@@ -7,11 +7,12 @@ from Ui_MainWindow import Ui_MainWindow
 # # from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from worker import WorkerThread
+from DBdataView import DBdataView
 
 from time import sleep
 
 
-class ARptWindow(QMainWindow, Ui_MainWindow):
+class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):
     def __init__(self, parent=None):
         super(ARptWindow, self).__init__(parent)
         self.setupUi(self)
@@ -23,6 +24,10 @@ class ARptWindow(QMainWindow, Ui_MainWindow):
         self.reports_result = './reports_result'
         if not os.path.exists(self.reports_result):
             os.makedirs(self.reports_result)
+
+        self.init_dataview()
+
+
 
     def getfiles(self):
         # dlg = QFileDialog()

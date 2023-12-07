@@ -116,9 +116,6 @@ class ARptWindow( DBdataView):
         # self.btnOpenFile.setEnabled(True)
         print('after time3')
 
-
-
-
     def open_folder(self):
         print('open1')
         path = os.path.abspath(self.reports_result)

@@ -1,0 +1,1 @@
+ python reporter.py -s "D:\project\PycharmProjects\pyqt5\NJS_ARpt_project\reports_result\表A.xlsx.json" --data "D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/尿结石表B：数据集.xlsx" -o "D:\project\PycharmProjects\pyqt5\NJS_ARpt_project\reports_result"

@@ -13,20 +13,15 @@ def predict_risk(data_fi,outdir):
     outdir = outdir + f'/tmp{time}'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    
-    # subprocess.call(f'“Rscript {r_dir}/Risk.R "  --encoding=utf-8  --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}',shell=True)
+
     rscript_path = shutil.which('Rscript')
     if rscript_path is None:
-        raise RuntimeError(
-            'Rscript not found ,please make sure R is installed and avaibale in the system PATH, 请查看R是否放在环境变量里')
-    print(
-        f'"{rscript_path}" --encoding=utf-8  {r_dir}/Risk.R --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}')
+        raise RuntimeError('Rscript not found ,please make sure R is installed and avaibale in the system PATH, 请查看R是否放在环境变量里')
+    print(f'"{rscript_path}" --encoding=utf-8  {r_dir}/Risk.R --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}')
     # print(f'Rscript {r_dir}/Risk.R --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}')
 
     # subprocess.call(f'"{rscript_path}" --encoding=utf-8 {r_dir}/Risk.R --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}',shell=True)
-    subprocess.call(
-        f'"{rscript_path}" --encoding=utf-8 {r_dir}/Risk.R --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}',
-        shell=True)
+    subprocess.call(f'"{rscript_path}" --encoding=utf-8 {r_dir}/Risk.R --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}',shell=True)
     # subprocess.call(f'Rscript {r_dir}/Risk.R --newdata={data_fi} --model={r_dir}/plsmodel.rds --variables={r_dir}/varnames.rds --rawdata={r_dir}/njs1_2.rds --outdir={outdir}',shell=True)
 
     df = pd.read_csv(f'{outdir}/predict_risk.csv',index_col=0)

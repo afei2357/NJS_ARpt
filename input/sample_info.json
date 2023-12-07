@@ -1,12 +1,8 @@
 {
  "sample_code": "S2302030001", 
- "files": {
-  "example_file": "http://baidu.com/xxx.xlsx"
- },
+
  "info": {
-  "project_id": 2, 
   "project_name": "尿结石风险筛查", 
-  "account_id": 1,
 
   "tested_user_id": 1,
   "bar_code_no": "S2302030001",

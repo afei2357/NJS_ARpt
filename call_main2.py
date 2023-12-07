@@ -12,7 +12,9 @@ from DBdataView import DBdataView
 from time import sleep
 
 
-class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):
+# class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):
+class ARptWindow( DBdataView):
+# class ARptWindow(QMainWindow,DBdataView):
     def __init__(self, parent=None):
         super(ARptWindow, self).__init__(parent)
         self.setupUi(self)
@@ -21,11 +23,14 @@ class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):
         self.label.setVisible(False)
         self.label_2.setVisible(False)
         self.label_3.setVisible(False)
-        self.reports_result = './reports_result'
+        workdir = os.path.abspath(os.path.dirname(__file__))
+        self.reports_result = os.path.join(workdir,'reports_result')
+        print('self.reports_result ')
+        print(self.reports_result )
         if not os.path.exists(self.reports_result):
             os.makedirs(self.reports_result)
 
-        self.init_dataview()
+        # self.init_dataview()
 
 
 
@@ -92,6 +97,7 @@ class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):
     def open_folder(self):
         print('open1')
         path = os.path.abspath(self.reports_result)
+        print('path')
         print(path)
         if os.path.exists(path):
             os.startfile(path)

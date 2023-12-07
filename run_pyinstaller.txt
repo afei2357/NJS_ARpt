@@ -1,0 +1,1 @@
+pyinstaller    --add-data "NJS_APpt;NJS_APpt" call_mainWindows.py

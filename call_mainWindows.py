@@ -3,15 +3,18 @@ import time
 
 # from PyQt5.QtWidgets import QApplication, QMainWindow
 from Ui_MainWindow import Ui_MainWindow
-from PyQt6.QtCore import *
-# from PyQt6.QtGui import *
+# from PyQt6.QtCore import *
+# # from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from worker import WorkerThread
+from DBdataView import DBdataView
 
 from time import sleep
 
 
-class ARptWindow(QMainWindow, Ui_MainWindow):
+# class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):
+class ARptWindow( DBdataView):
+# class ARptWindow(QMainWindow,DBdataView):
     def __init__(self, parent=None):
         super(ARptWindow, self).__init__(parent)
         self.setupUi(self)
@@ -20,9 +23,16 @@ class ARptWindow(QMainWindow, Ui_MainWindow):
         self.label.setVisible(False)
         self.label_2.setVisible(False)
         self.label_3.setVisible(False)
-        self.reports_result = './reports_result'
+        workdir = os.path.abspath(os.path.dirname(__file__))
+        self.reports_result = os.path.join(workdir,'reports_result')
+        print('self.reports_result ')
+        print(self.reports_result )
         if not os.path.exists(self.reports_result):
             os.makedirs(self.reports_result)
+
+        # self.init_dataview()
+
+
 
     def getfiles(self):
         # dlg = QFileDialog()
@@ -33,10 +43,16 @@ class ARptWindow(QMainWindow, Ui_MainWindow):
         # options |= QFileDialog.DontUseNativeDialog
         # options |= QFileDialog.DontUseCustomDirectoryIcons
 
+    # def test(self):
         # files, _ = QFileDialog.getOpenFileNames(self, "选取多个文件", ".",
-        #                                         "All Files (*);;Text Files (*.txt)", options=options)
+                                                # "All Files (*);;Text Files (*.txt)")
+        # files, _ = QFileDialog.getOpenFileNames(self, caption="选取多个文件", directory=".",
+        #                                         filter="All Files (*);;Text Files (*.txt)")
+
         files, _ = QFileDialog.getOpenFileNames(self, caption='选择多个文件', directory=os.path.abspath('.'),
-                                                filter="All files(*);;Python files(*.py);;Image files (*.jpg *.png);;Image files2(*.ico *.gif)")
+                                                         filter="All files(*);;Python files(*.py);;Image files (*.jpg *.png);;Image files2(*.ico *.gif)")
+        if not files:
+            return
 
         for file in files:
             if not (file.endswith('xlsx') or file.endswith('json')):
@@ -47,29 +63,15 @@ class ARptWindow(QMainWindow, Ui_MainWindow):
                 self.xlxs_file = file
             if file.endswith('json'):
                 self.js_file = file
+
+
+
         # 开启新线程执行报告：
         self.thread = WorkerThread(self.xlxs_file,self.js_file,self.reports_result)
         self.thread.started.connect(self.runing_state)
         self.thread.finished.connect(self.finished_state)
         self.thread.start()
         # self.label.setText('报告正在生成，请稍后...')
-
-
-
-        # time.sleep(2)
-        # msgBox = QMessageBox()
-        # # msgBox.information(self,'请稍等','正在生成报告，请等待',QMessageBox.Yes)
-        # msgBox.setText('请稍等-------')
-        # msgBox.setStandardButtons(QMessageBox.Ok)
-        # msgBox.setDefaultButton(QMessageBox.Ok)
-        # timer = QTimer()
-        # timer.setSingleShot(True)
-        # timer.timeout.connect(msgBox.close)
-        # timer.start(500)
-        # msgBox.exec_()
-
-        # run_rpt(self.xlxs_file,self.js_file,self.reports_result)
-        # sleep(2)
 
 
     def runing_state(self):
@@ -87,8 +89,6 @@ class ARptWindow(QMainWindow, Ui_MainWindow):
     def finished_state(self):
         self.label.setText("<font color=green size=2><b>报告已完成!</b></font>")
         self.btnOpenFile.setEnabled(True)
-        # self.btnReport.setEnabled(True)
-        # QMessageBox.information(self, '请稍等', '报告已完成', QMessageBox.Yes)
         print('after time3')
 
 
@@ -97,6 +97,7 @@ class ARptWindow(QMainWindow, Ui_MainWindow):
     def open_folder(self):
         print('open1')
         path = os.path.abspath(self.reports_result)
+        print('path')
         print(path)
         if os.path.exists(path):
             os.startfile(path)

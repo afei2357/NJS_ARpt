@@ -40,6 +40,7 @@ class ARptWindow( DBdataView):
         else:
             self.btnGenerateReport.setEnabled(False)
         # self.init_dataview()
+        self.initUI()
 
 
 
@@ -114,6 +115,8 @@ class ARptWindow( DBdataView):
 
         self.lbl_report_status.setText("<font color=green size=2><b>报告已完成!</b></font>")
         # self.btnOpenFile.setEnabled(True)
+        self.updateStatus()
+        self.tableView.reset()
         print('after time3')
 
     def open_folder(self):

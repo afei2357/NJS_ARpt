@@ -221,6 +221,32 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="btnTestReport">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>350</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>测试报告</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnShowPatientInfo">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>350</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>显示数据表</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -25,31 +25,6 @@ def createTableAndInit():
     query.exec("insert into student values(1,'张三1','男',20,'计算机')")
     query.exec("insert into student values(2,'李四1','男',19,'经管')")
     query.exec("insert into student values(3,'王五1','男',22,'机械')")
-    query.exec("insert into student values(4,'赵六1','男',21,'法律')")
-    query.exec("insert into student values(5,'小明1','男',20,'英语')")
-    query.exec("insert into student values(6,'小李1','女',19,'计算机')")
-    query.exec("insert into student values(7,'小张1','男',20,'机械')")
-    query.exec("insert into student values(8,'小刚1','男',19,'经管')")
-    query.exec("insert into student values(9,'张三2','男',21,'计算机')")
-    query.exec("insert into student values(10,'张三3','女',20,'法律')")
-    query.exec("insert into student values(11,'王五2','男',19,'经管')")
-    query.exec("insert into student values(12,'张三4','男',20,'计算机')")
-    query.exec("insert into student values(13,'小李2','男',20,'机械')")
-    query.exec("insert into student values(14,'李四2','女',19,'经管')")
-    query.exec("insert into student values(15,'赵六3','男',21,'英语')")
-    query.exec("insert into student values(16,'李四2','男',19,'法律')")
-    query.exec("insert into student values(17,'小张2','女',22,'经管')")
-    query.exec("insert into student values(18,'李四3','男',21,'英语')")
-    query.exec("insert into student values(19,'小李3','女',19,'法律')")
-    query.exec("insert into student values(20,'王五3','女',20,'机械')")
-    query.exec("insert into student values(21,'张三4','男',22,'计算机')")
-    query.exec("insert into student values(22,'小李2','男',20,'法律')")
-    query.exec("insert into student values(23,'张三5','男',19,'经管')")
-    query.exec("insert into student values(24,'小张3','女',20,'计算机')")
-    query.exec("insert into student values(25,'李四4','男',22,'英语')")
-    query.exec("insert into student values(26,'赵六2','男',20,'机械')")
-    query.exec("insert into student values(27,'小李3','女',19,'英语')")
-    query.exec("insert into student values(28,'王五4','男',21,'经管')")
     db.close()
     return True
 
@@ -81,9 +56,9 @@ class DBdataView(QMainWindow,Ui_MainWindow):
         # 总记录数
         self.totalRecrodCount = 0
         # 每页显示记录数
-        self.PageRecordCount = 5
+        self.PageRecordCount = 20
         self.db = None
-
+        print('----initInDataview -----'*20)
         self.initUI()
 
     def initUI(self):
@@ -114,8 +89,10 @@ class DBdataView(QMainWindow,Ui_MainWindow):
 
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
+        self.reset_table_view()
+    def reset_table_view(self):
         # 设置当前页
-        self.currentPage = 1;
+        self.currentPage = 1
         # 得到总记录数
         self.totalRecrodCount = self.getTotalRecordCount()
         # 得到总页数
@@ -126,7 +103,6 @@ class DBdataView(QMainWindow,Ui_MainWindow):
         self.setTotalPageLabel()
         # 设置总记录数
         self.setTotalRecordLabel()
-
         # 记录查询
         self.recordQuery(0)
         # 设置模型
@@ -154,10 +130,12 @@ class DBdataView(QMainWindow,Ui_MainWindow):
 
     # 得到页数
     def getPageCount(self):
+        print('in getPageCount1',self.totalRecrodCount ,self.PageRecordCount)
+        print('in getPageCount2',self.totalRecrodCount /self.PageRecordCount)
         if self.totalRecrodCount % self.PageRecordCount == 0:
             return (self.totalRecrodCount / self.PageRecordCount)
         else:
-            return (self.totalRecrodCount / self.PageRecordCount + 1)
+            return (self.totalRecrodCount % self.PageRecordCount + 1)
 
     # 记录查询
     def recordQuery(self, limitIndex):
@@ -169,7 +147,8 @@ class DBdataView(QMainWindow,Ui_MainWindow):
     def updateStatus(self):
         szCurrentText = ("当前第%d页" % self.currentPage)
         self.currentPageLabel.setText(szCurrentText)
-
+        print(' self.currentPage == self.totalPage')
+        print( self.currentPage,  self.totalPage)
         # 设置按钮是否可用
         if self.currentPage == 1:
             self.prevButton.setEnabled(False)
@@ -207,6 +186,7 @@ class DBdataView(QMainWindow,Ui_MainWindow):
         self.recordQuery(limitIndex)
         self.currentPage += 1
         self.updateStatus()
+        print('next click ----------',self.currentPage ,self.totalPage)
 
     # 转到页按钮按下
     def onSwitchPageButtonClick(self):

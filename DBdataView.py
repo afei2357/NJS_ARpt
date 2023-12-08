@@ -136,15 +136,18 @@ class DBdataView(QMainWindow,Ui_MainWindow):
         print('totalPage=' + str(self.totalPage))
 
         # 设置表格表头
-        self.queryModel.setHeaderData(0, Qt.Orientation.Horizontal, "编号")
-        self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "姓名")
-        self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "性别")
-        self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "年龄")
-        self.queryModel.setHeaderData(4, Qt.Orientation.Horizontal, "院系")
+        self.queryModel.setHeaderData(0, Qt.Orientation.Horizontal, "id")
+        self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "编号")
+        self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "姓名")
+        self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "性别")
+        self.queryModel.setHeaderData(4, Qt.Orientation.Horizontal, "年龄")
+        self.queryModel.setHeaderData(5, Qt.Orientation.Horizontal, "采样日期")
+        self.queryModel.setHeaderData(6, Qt.Orientation.Horizontal, "风险区间")
+        self.queryModel.setHeaderData(7, Qt.Orientation.Horizontal, "风险值")
 
     # 得到记录数
     def getTotalRecordCount(self):
-        self.queryModel.setQuery("select * from student")
+        self.queryModel.setQuery("select * from patient_info")
         rowCount = self.queryModel.rowCount()
         print('rowCount==' + str(rowCount))
         return rowCount
@@ -158,7 +161,7 @@ class DBdataView(QMainWindow,Ui_MainWindow):
 
     # 记录查询
     def recordQuery(self, limitIndex):
-        szQuery = ("select * from student limit %d,%d" % (limitIndex, self.PageRecordCount))
+        szQuery = ("select * from patient_info limit %d,%d" % (limitIndex, self.PageRecordCount))
         print('query sql=' + szQuery)
         self.queryModel.setQuery(szQuery)
 
@@ -246,7 +249,7 @@ class DBdataView(QMainWindow,Ui_MainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    createTableAndInit()
+    # createTableAndInit()
         # 创建窗口
     example = DBdataView()
     # 显示窗口

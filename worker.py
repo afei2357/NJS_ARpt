@@ -40,7 +40,7 @@ class WorkerThread(QThread):
 
     def run(self):
         print('running ---1')
-        df = pandas.read_excel(self.info_file)
+        df = pandas.read_excel(self.info_file,dtype=str)
         df_dct = df.to_dict()
         js_dct = {}
         info_dct = {}
@@ -63,6 +63,8 @@ class WorkerThread(QThread):
         time.sleep(2)
         print('running ---2')
         print(self.results)
+        # with open('result2.json','w',encoding='utf-8') as out:
+        #     json.dump(self.results,out,indent=4,ensure_ascii=False)
         print('will insert ')
 
         self.insert_tb()
@@ -78,14 +80,19 @@ class WorkerThread(QThread):
             return False
         # 声明数据库查询对象
         self.query = QSqlQuery()
+
         sample_code = self.results.get('sample_code')
         name = self.results['info'].get('name')
         gender_desc = self.results['info'].get('gender_desc')
         birthday = self.results['info'].get('birthday')
-        risk = self.results['info'].get('risk')
-        predict_pls = self.results['info'].get('predict_pls')
-
-        self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,risk,predict_pls)  values('{sample_code}','{name}','{gender_desc}','{birthday}','{risk}','{predict_pls}')")
+        sampling_time = self.results['info'].get('sampling_time')
+        risk = self.results['predict_risk'].get('risk')
+        predict_pls = self.results['predict_risk'].get('predict_pls')
+        print('risk,predict_pls')
+        print(risk,predict_pls)
+        self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls)  values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
+        print('self.query.result()')
+        print(self.query.result())
         self.db.close()
         print('finish insert ')
     # query.exec("insert into student values(1,'张三1','男',20,'计算机')")

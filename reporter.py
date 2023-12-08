@@ -43,10 +43,11 @@ def run_rpt(data_fi,sample_fi,outdir):
     plt.savefig(f'{outdir}/{sample_code}.risk_scatter.png',bbox_inches='tight')
     plt.close()
     results['predict_risk']['fig'] = f'{outdir}/{sample_code}.risk_scatter.png'
-    print('results')
+    print('results---')
     print(results)
     ## 生成报告
     njs.report.todocx(results,outdir)
+
     return results
 
 

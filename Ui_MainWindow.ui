@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>724</width>
-    <height>1025</height>
+    <height>1172</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -250,19 +250,19 @@
    <widget class="QLabel" name="lbl_finish">
     <property name="geometry">
      <rect>
-      <x>171</x>
-      <y>944</y>
-      <width>231</width>
-      <height>31</height>
+      <x>140</x>
+      <y>920</y>
+      <width>301</width>
+      <height>161</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>30</pointsize>
+      <pointsize>10</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string/>
     </property>
    </widget>
   </widget>

@@ -44,8 +44,8 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.value_file=''
         workdir = os.path.abspath(os.path.dirname(__file__))
         self.reports_result = os.path.join(workdir,'reports_result')
-        print('self.reports_result ')
-        print(self.reports_result )
+        # print('self.reports_result ')
+        # print(self.reports_result )
         if not os.path.exists(self.reports_result):
             os.makedirs(self.reports_result)
 
@@ -60,7 +60,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
 
     def show_patient_info(self):
         self.finished_state()
-        print('show_patient_info ')
+        # print('show_patient_info ')
         # pass
 
     def getfiles(self,value='A'):
@@ -90,9 +90,9 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.label_value.setText(os.path.basename(self.value_file))
         self.label_info.setVisible(True)
         self.label_value.setVisible(True)
-        print(self.info_file and self.value_file)
-        print('self.info_file and self.value_file')
-        print(self.info_file , self.value_file)
+        # print(self.info_file and self.value_file)
+        # print('self.info_file and self.value_file')
+        # print(self.info_file , self.value_file)
 
         if self.info_file and self.value_file:
             self.btnGenerateReport.setEnabled(True)
@@ -103,12 +103,12 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.thread.finished.connect(self.finished_state)
         self.thread.signal.connect(self.finished_state_update_table)
         self.thread.start()
-        print('generate_reporting ccc')
+        # print('generate_reporting ccc')
 
     def runing_state(self):
         self.btnGenerateReport.setEnabled(False)
         # self.btnOpenFile.setEnabled(False)
-        print('in state')
+        # print('in state')
         self.lbl_report_status.setVisible(True)
         self.lbl_report_status.setText("<font color=red size=2><b>报告正在生成，请稍后...</b></font>")
     def test_generate_report_table(self):
@@ -123,7 +123,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         # self.btnOpenFile.setEnabled(True)
         self.setTableView()
         self.updateStatus()
-        print('after time3')
+        # print('after time3')
 
         # self.tableView.reset()
 
@@ -131,23 +131,23 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.lbl_finish.setText(content)
         # self.btnOpenFile.setEnabled(True)
         # self.updateStatus()
-        print('after time3')
+        # print('after time3')
         # self.tableView.reset()
 
     def open_folder(self):
-        print('open1')
+        # print('open1')
         path = os.path.abspath(self.reports_result)
-        print('path')
-        print(path)
+        # print('path')
+        # print(path)
         if os.path.exists(path):
             os.startfile(path)
         else:
             QMessageBox.information(self, '错误', '路径不存在，请检查', QMessageBox.Yes)
-        print('open2')
+        # print('open2')
 
     def show_message(self):
         reply = QMessageBox.information(self, '错误', '必须为xlsx或者json结尾的文件', QMessageBox.Yes | QMessageBox.No)
-        print(reply)
+        # print(reply)
 
 
     # 数据库相关
@@ -170,7 +170,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
     def setTableView(self):
-        print('*** step2 SetTableView')
+        # print('*** step2 SetTableView')
         self.db = QSqlDatabase.addDatabase('QSQLITE')
         # 设置数据库名称
         self.db.setDatabaseName('./db/database.db')
@@ -201,8 +201,8 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         # 设置模型
         self.tableView.setModel(self.queryModel)
 
-        print('totalRecrodCount=' + str(self.totalRecrodCount))
-        print('totalPage=' + str(self.totalPage))
+        # print('totalRecrodCount=' + str(self.totalRecrodCount))
+        # print('totalPage=' + str(self.totalPage))
         self.updateStatus()
 
 
@@ -232,13 +232,13 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.queryModel.setQuery("select * from patient_info")
 
         rowCount = self.queryModel.rowCount()
-        print('rowCount==' + str(rowCount))
+        # print('rowCount==' + str(rowCount))
         return rowCount
 
     # 得到页数
     def getPageCount(self):
-        print('self.totalRecrodCount, self.PageRecordCount')
-        print(self.totalRecrodCount, self.PageRecordCount)
+        # print('self.totalRecrodCount, self.PageRecordCount')
+        # print(self.totalRecrodCount, self.PageRecordCount)
         if self.totalRecrodCount % self.PageRecordCount == 0:
             # 地板除
             return (self.totalRecrodCount // self.PageRecordCount)
@@ -248,15 +248,15 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
     # 记录查询
     def recordQuery(self, limitIndex):
         szQuery = ("select * from patient_info limit %d,%d" % (limitIndex, self.PageRecordCount))
-        print('query sql=' + szQuery)
+        # print('query sql=' + szQuery)
         self.queryModel.setQuery(szQuery)
 
     # 刷新状态
     def updateStatus(self):
         szCurrentText = ("当前第%d页" % self.currentPage)
         self.currentPageLabel.setText(szCurrentText)
-        print('self.currentPage == self.totalPage------------')
-        print(self.currentPage , self.totalPage)
+        # print('self.currentPage == self.totalPage------------')
+        # print(self.currentPage , self.totalPage)
         # 设置按钮是否可用
         if self.currentPage <= 1:
             self.prevButton.setEnabled(False)
@@ -275,12 +275,12 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
     # 设置总记录数
     def setTotalRecordLabel(self):
         szTotalRecordText = ("共%d条" % self.totalRecrodCount)
-        print('*** setTotalRecordLabel szTotalRecordText=' + szTotalRecordText)
+        # print('*** setTotalRecordLabel szTotalRecordText=' + szTotalRecordText)
         self.totalRecordLabel.setText(szTotalRecordText)
 
     # 前一页按钮按下
     def onPrevButtonClick(self):
-        print('*** onPrevButtonClick ');
+        # print('*** onPrevButtonClick ');
         limitIndex = (self.currentPage - 2) * self.PageRecordCount
         self.recordQuery(limitIndex)
         self.currentPage -= 1
@@ -288,19 +288,19 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
 
     # 后一页按钮按下
     def onNextButtonClick(self):
-        print('*** onNextButtonClick ')
+        # print('*** onNextButtonClick ')
         limitIndex = self.currentPage * self.PageRecordCount
         self.recordQuery(limitIndex)
         self.currentPage += 1
         self.updateStatus()
-        print('next click ----------')
+        # print('next click ----------')
 
     # 转到页按钮按下
     def onSwitchPageButtonClick(self):
         # 得到输入字符串
         szText = self.switchPageLineEdit.text()
-        print('szText')
-        print(szText)
+        # print('szText')
+        # print(szText)
         # 数字正则表达式
         pattern = re.compile(r'^[-+]?[0-9]+\.[0-9]+$')
         match = pattern.match(szText)

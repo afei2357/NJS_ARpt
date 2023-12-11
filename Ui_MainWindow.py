@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(724, 1025)
+        MainWindow.resize(724, 1172)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -112,10 +112,11 @@ class Ui_MainWindow(object):
         self.btnShowPatientInfo.setGeometry(QtCore.QRect(340, 350, 93, 28))
         self.btnShowPatientInfo.setObjectName("btnShowPatientInfo")
         self.lbl_finish = QtWidgets.QLabel(self.centralwidget)
-        self.lbl_finish.setGeometry(QtCore.QRect(171, 944, 231, 31))
+        self.lbl_finish.setGeometry(QtCore.QRect(140, 920, 301, 161))
         font = QtGui.QFont()
-        font.setPointSize(30)
+        font.setPointSize(10)
         self.lbl_finish.setFont(font)
+        self.lbl_finish.setText("")
         self.lbl_finish.setObjectName("lbl_finish")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -152,4 +153,3 @@ class Ui_MainWindow(object):
         self.totalRecordLabel.setText(_translate("MainWindow", "TextLabel"))
         self.btnTestReport.setText(_translate("MainWindow", "测试报告"))
         self.btnShowPatientInfo.setText(_translate("MainWindow", "显示数据表"))
-        self.lbl_finish.setText(_translate("MainWindow", "TextLabel"))

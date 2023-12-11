@@ -24,13 +24,16 @@ class WorkerThread(QThread):
         print('\n running ---1')
         sample_list_AB_table_path  = self.get_sub_xlsx(self.info_file,self.value_file,self.reports_result)
         print('will run generate ')
+        content = '已完成报告：\n'
         for sample_path in sample_list_AB_table_path:
-            self.signal.emit( ' 正在生成报告中，请等待---')
+            # self.signal.emit( ' 正在生成报告中，请等待---')
             # self.signal.emit(sample_path+'正常生成')
             print(sample_path)
-            results = run_rpt(sample_path[1],sample_path[0],  self.reports_result)
+            results = run_rpt(sample_path[1],sample_path[0], self.reports_result)
             self.insert_tb(results)
-            self.signal.emit(' 已经完成---')
+            content += sample_path[2]+'\n'
+            self.signal.emit(content)
+            # time.sleep(10)
             # self.signal.emit()
 
         # time.sleep(2)
@@ -76,7 +79,8 @@ class WorkerThread(QThread):
         both2table_sampel = set(a_sample_lst) & set(b_sample_lst)
 
         return zip([os.path.join(result_out_dir, sample_code, sample_code + '_Atable.json') for sample_code in both2table_sampel],
-                   [os.path.join(result_out_dir, sample_code, sample_code + '_Btable.xlsx') for sample_code in both2table_sampel])
+                   [os.path.join(result_out_dir, sample_code, sample_code + '_Btable.xlsx') for sample_code in both2table_sampel],
+                   both2table_sampel )
 
     def insert_tb(self,results):
         # self.db = QSqlDatabase.addDatabase('QSQLITE')
@@ -97,16 +101,24 @@ class WorkerThread(QThread):
         sampling_time = results['info'].get('sampling_time')
         risk = results['predict_risk'].get('risk')
         predict_pls = results['predict_risk'].get('predict_pls')
-        print('risk,predict_pls')
-        print(risk,predict_pls)
-        ok = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls)  values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
-        print('self.query.result()')
-        print(self.query.result())
-        print(ok )
-        print('self.query.lastError().text()')
-        print(self.query.lastError().text())
-        # self.db.close()
-        print('finish insert ')
+        # print('risk,predict_pls')
+        # print(risk,predict_pls)
+        self.query.exec(f"select 1 from patient_info where sample_code='{sample_code}'; ")
+        if self.query.next():
+            ok = self.query.exec(f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
+                            f" where sample_code='{sample_code}' ;")
+        else:
+            ok = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls) "
+                             f" values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
+        # if not ok:
+        #     print('Error : ',self.query.lastError() .text() )
+        # print('self.query.result()')
+        # print(self.query.result())
+        # print(ok )
+        # print('self.query.lastError().text()')
+        # print(self.query.lastError().text())
+        # # self.db.close()
+        # print('finish insert ')
 
 
     def ceate_table(self):

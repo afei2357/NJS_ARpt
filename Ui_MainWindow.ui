@@ -247,6 +247,24 @@
      <string>显示数据表</string>
     </property>
    </widget>
+   <widget class="QLabel" name="lbl_finish">
+    <property name="geometry">
+     <rect>
+      <x>171</x>
+      <y>944</y>
+      <width>231</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>30</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

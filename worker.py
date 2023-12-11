@@ -9,7 +9,8 @@ from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 
 
 class WorkerThread(QThread):
-    signal = pyqtSignal()
+    signal = pyqtSignal(str)
+    # signal = pyqtSignal()
     def __init__(self,info_file,value_file,reports_result,db):
         super(WorkerThread,self).__init__()
         self.info_file = info_file
@@ -19,62 +20,65 @@ class WorkerThread(QThread):
         basename = os.path.basename(self.info_file)
         self.js_file = os.path.join(reports_result,f'{basename}.json')
 
-    # def set_tb(self):
-    #     print('*** step2 SetTableView')
-    #     self.db = QSqlDatabase.addDatabase('QSQLITE')
-    #     # 设置数据库名称
-    #     self.db.setDatabaseName('./db/database.db')
-    #     # 打开数据库
-    #     self.db.open()
-    #
-    #     # 声明查询模型
-    #     # self.queryModel = QSqlQueryModel(self)
-    #
-    #     # 添加数据库
-    #     # 设置数据库名称
-    #     # 判断是否打开
-    #     if not self.db.open():
-    #         return False
-    #
-    #     # 声明数据库查询对象
-    #     self.query = QSqlQuery()
-    #     self.query.exec('select * from student ')
-    #     self.db.close()
-
-
     def run(self):
         print('\n running ---1')
-        df = pandas.read_excel(self.info_file,dtype=str)
-        df_dct = df.to_dict()
-        js_dct = {}
-        info_dct = {}
-        for k ,v in df_dct.items():
-            if k != 'sample_code':
-                info_dct[k] = str( v.get(0) )
-            else:
-                js_dct[k] = str( v.get(0) )
-        js_dct['info'] = info_dct
-        # print(js_dct)
-        # print('self.info_file, self.js_file,self.value_file, self.reports_result')
-        # print(self.info_file)
-        # print(self.js_file)
-        # print(self.value_file)
-        # print(self.reports_result)
-        with open(self.js_file,'w',encoding='utf-8') as out:
-            json.dump(js_dct,out,indent=2,ensure_ascii=False)
+        sample_list_AB_table_path  = self.get_sub_xlsx(self.info_file,self.value_file,self.reports_result)
         print('will run generate ')
-        self.results = run_rpt(self.value_file, self.js_file, self.reports_result)
-        self.insert_tb()
+        for sample_path in sample_list_AB_table_path:
+            self.signal.emit( ' 正在生成报告中，请等待---')
+            # self.signal.emit(sample_path+'正常生成')
+            print(sample_path)
+            results = run_rpt(sample_path[1],sample_path[0],  self.reports_result)
+            self.insert_tb(results)
+            self.signal.emit(' 已经完成---')
+            # self.signal.emit()
+
         # time.sleep(2)
         print('running ---2')
-        print(self.results)
-        # with open('result2.json','w',encoding='utf-8') as out:
-        #     json.dump(self.results,out,indent=4,ensure_ascii=False)
         print('will insert ')
 
 
+# 将两个excel表格的内容，每个样本分别提取出来作为一个excel表格，
+    def get_sub_xlsx(self,Axlsx, Bxlsx, result_out_dir):
+        adf = pd.read_excel(Axlsx, dtype=str)
+        bdf = pd.read_excel(Bxlsx)
+        a_sample_lst = []
+        b_sample_lst = []
+        # 将A表内容分别保存为json
+        for i in range(len(adf)):
+            sample_code = adf.iloc[i, :].loc['sample_code']
+            a_sample_lst.append(sample_code)
+            outdir = os.path.join(result_out_dir, sample_code)
+            if not os.path.exists(outdir):
+                os.makedirs(outdir)
+            a_outf_file = os.path.join(outdir, sample_code + '_Atable.json')
+            df_dct = adf.loc[i].to_dict()
+            js_dct = {}
+            info_dct = {}
+            for k, v in df_dct.items():
+                if k != 'sample_code':
+                    info_dct[k] = str(v)
+                else:
+                    js_dct[k] = str(v)
+            js_dct['info'] = info_dct
+            with open(a_outf_file, 'w', encoding='utf-8') as out:
+                json.dump(js_dct, out, indent=2, ensure_ascii=False)
+        # 将B表内容分别保存为xlsx:
+        for i in range(len(bdf)):
+            sample_code = bdf.loc[i, :].loc[u'实验号']
+            b_sample_lst.append(sample_code)
+            # print(sample_code)
+            outdir = os.path.join(result_out_dir, sample_code)
+            if not os.path.exists(outdir):
+                os.makedirs(outdir)
+            b_outf_file = os.path.join(outdir, sample_code + '_Btable.xlsx')
+            bdf.loc[i:i, :].to_excel(b_outf_file, index=False)
+        both2table_sampel = set(a_sample_lst) & set(b_sample_lst)
 
-    def insert_tb(self):
+        return zip([os.path.join(result_out_dir, sample_code, sample_code + '_Atable.json') for sample_code in both2table_sampel],
+                   [os.path.join(result_out_dir, sample_code, sample_code + '_Btable.xlsx') for sample_code in both2table_sampel])
+
+    def insert_tb(self,results):
         # self.db = QSqlDatabase.addDatabase('QSQLITE')
         # # 设置数据库名称
         # self.db.setDatabaseName('./db/database.db')
@@ -86,19 +90,19 @@ class WorkerThread(QThread):
         # 声明数据库查询对象
         self.query = QSqlQuery(self.db)
 
-        sample_code = self.results.get('sample_code')
-        name = self.results['info'].get('name')
-        gender_desc = self.results['info'].get('gender_desc')
-        birthday = self.results['info'].get('birthday')
-        sampling_time = self.results['info'].get('sampling_time')
-        risk = self.results['predict_risk'].get('risk')
-        predict_pls = self.results['predict_risk'].get('predict_pls')
+        sample_code = results.get('sample_code')
+        name = results['info'].get('name')
+        gender_desc = results['info'].get('gender_desc')
+        birthday = results['info'].get('birthday')
+        sampling_time = results['info'].get('sampling_time')
+        risk = results['predict_risk'].get('risk')
+        predict_pls = results['predict_risk'].get('predict_pls')
         print('risk,predict_pls')
         print(risk,predict_pls)
         ok = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls)  values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
         print('self.query.result()')
         print(self.query.result())
-        print(ok  )
+        print(ok )
         print('self.query.lastError().text()')
         print(self.query.lastError().text())
         # self.db.close()

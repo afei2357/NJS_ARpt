@@ -101,6 +101,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.thread = WorkerThread(self.info_file, self.value_file, self.reports_result,self.db)
         self.thread.started.connect(self.runing_state)
         self.thread.finished.connect(self.finished_state)
+        self.thread.signal.connect(self.finished_state_update_table)
         self.thread.start()
         print('generate_reporting ccc')
 
@@ -118,13 +119,20 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         # pass
     def finished_state(self):
         self.btnGenerateReport.setEnabled(True)
-        self.lbl_report_status.setText("<font color=green size=2><b>报告已完成!</b></font>")
+        self.lbl_report_status.setText("<font color=green size=2><b>报告已全部完成!</b></font>")
         # self.btnOpenFile.setEnabled(True)
+        self.setTableView()
         self.updateStatus()
         print('after time3')
 
-        self.tableView.reset()
+        # self.tableView.reset()
 
+    def finished_state_update_table(self,content):
+        self.lbl_finish.setText(content)
+        # self.btnOpenFile.setEnabled(True)
+        # self.updateStatus()
+        print('after time3')
+        # self.tableView.reset()
 
     def open_folder(self):
         print('open1')
@@ -183,7 +191,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         # print('----total page:')
 
         # 刷新状态
-        self.updateStatus()
+        # self.updateStatus()
         # 设置总页数文本
         self.setTotalPageLabel()
         # 设置总记录数
@@ -195,6 +203,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
 
         print('totalRecrodCount=' + str(self.totalRecrodCount))
         print('totalPage=' + str(self.totalPage))
+        self.updateStatus()
 
 
         # 设置表格表头
@@ -231,9 +240,10 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         print('self.totalRecrodCount, self.PageRecordCount')
         print(self.totalRecrodCount, self.PageRecordCount)
         if self.totalRecrodCount % self.PageRecordCount == 0:
-            return (self.totalRecrodCount / self.PageRecordCount)
+            # 地板除
+            return (self.totalRecrodCount // self.PageRecordCount)
         else:
-            return (self.totalRecrodCount % self.PageRecordCount + 1)
+            return (self.totalRecrodCount // self.PageRecordCount + 1)
 
     # 记录查询
     def recordQuery(self, limitIndex):
@@ -245,17 +255,16 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
     def updateStatus(self):
         szCurrentText = ("当前第%d页" % self.currentPage)
         self.currentPageLabel.setText(szCurrentText)
-        print('self.currentPage ,self.totalPage，self.totalRecrodCount')
-        print(self.currentPage ,self.totalPage,self.totalRecrodCount)
+        print('self.currentPage == self.totalPage------------')
+        print(self.currentPage , self.totalPage)
         # 设置按钮是否可用
-        if self.currentPage == 1:
+        if self.currentPage <= 1:
             self.prevButton.setEnabled(False)
-            self.nextButton.setEnabled(True)
-        elif self.currentPage == self.totalPage:
-            self.prevButton.setEnabled(True)
-            self.nextButton.setEnabled(False)
         else:
             self.prevButton.setEnabled(True)
+        if self.currentPage >= self.totalPage:
+            self.nextButton.setEnabled(False)
+        else:
             self.nextButton.setEnabled(True)
 
     # 设置总数页文本

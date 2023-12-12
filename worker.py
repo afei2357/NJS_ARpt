@@ -23,8 +23,9 @@ class WorkerThread(QThread):
     def run(self):
         print('\n running ---1')
         sample_list_AB_table_path  = self.get_sub_xlsx(self.info_file,self.value_file,self.reports_result)
-        print('will run generate ')
+        # print('will run generate ')
         content = '已完成报告：\n'
+        print(sample_list_AB_table_path)
         for sample_path in sample_list_AB_table_path:
             # self.signal.emit( ' 正在生成报告中，请等待---')
             # self.signal.emit(sample_path+'正常生成')
@@ -37,8 +38,8 @@ class WorkerThread(QThread):
             # self.signal.emit()
 
         # time.sleep(2)
-        print('running ---2')
-        print('will insert ')
+        # print('running ---2')
+        # print('will insert ')
 
 
 # 将两个excel表格的内容，每个样本分别提取出来作为一个excel表格，
@@ -77,20 +78,14 @@ class WorkerThread(QThread):
             b_outf_file = os.path.join(outdir, sample_code + '_Btable.xlsx')
             bdf.loc[i:i, :].to_excel(b_outf_file, index=False)
         both2table_sampel = set(a_sample_lst) & set(b_sample_lst)
+        print('both2table_sampel')
+        print(both2table_sampel)
 
         return zip([os.path.join(result_out_dir, sample_code, sample_code + '_Atable.json') for sample_code in both2table_sampel],
                    [os.path.join(result_out_dir, sample_code, sample_code + '_Btable.xlsx') for sample_code in both2table_sampel],
                    both2table_sampel )
 
     def insert_tb(self,results):
-        # self.db = QSqlDatabase.addDatabase('QSQLITE')
-        # # 设置数据库名称
-        # self.db.setDatabaseName('./db/database.db')
-        # # 打开数据库
-        # self.db.open()
-        # # 判断是否打开
-        # if not self.db.open():
-        #     return False
         # 声明数据库查询对象
         self.query = QSqlQuery(self.db)
 
@@ -101,8 +96,8 @@ class WorkerThread(QThread):
         sampling_time = results['info'].get('sampling_time')
         risk = results['predict_risk'].get('risk')
         predict_pls = results['predict_risk'].get('predict_pls')
-        # print('risk,predict_pls')
-        # print(risk,predict_pls)
+        print('risk,predict_pls')
+        print(risk,predict_pls)
         self.query.exec(f"select 1 from patient_info where sample_code='{sample_code}'; ")
         if self.query.next():
             ok = self.query.exec(f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
@@ -110,15 +105,15 @@ class WorkerThread(QThread):
         else:
             ok = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls) "
                              f" values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
-        # if not ok:
-        #     print('Error : ',self.query.lastError() .text() )
-        # print('self.query.result()')
-        # print(self.query.result())
-        # print(ok )
-        # print('self.query.lastError().text()')
-        # print(self.query.lastError().text())
-        # # self.db.close()
-        # print('finish insert ')
+        if not ok:
+            print('Error : ',self.query.lastError() .text() )
+        print('self.query.result()')
+        print(self.query.result())
+        print(ok )
+        print('self.query.lastError().text()')
+        print(self.query.lastError().text())
+        # self.db.close()
+        print('finish insert ')
 
 
     def ceate_table(self):

@@ -1,14 +1,11 @@
-from Ui_be_called import Ui_Form
-
-
 from PyQt6.QtCore import Qt
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
-import sys,os,re
+import re
 from PyQt6.QtWidgets import *
-from Ui_be_called import Ui_Form
+from Ui_be_called import Ui_widget
 
 
-class mainCelled( QDialog,Ui_Form):
+class mainCelled( QDialog,Ui_widget):
     def __init__(self, db,parent=None):
         super(mainCelled, self).__init__(parent)
         self.setupUi(self)
@@ -26,36 +23,27 @@ class mainCelled( QDialog,Ui_Form):
         self.db = db
         self.initUI()
 
-
-
-
     # 数据库相关
     def initUI(self):
         # 创建窗口
         # self.createWindow()
         # 设置表格
         self.setTableView()
-
-        # # 信号槽连接
+        # # 信号槽连接：上一页、下一页、跳转页
         self.prevButton.clicked.connect(self.onPrevButtonClick)
         self.nextButton.clicked.connect(self.onNextButtonClick)
         self.switchPageButton.clicked.connect(self.onSwitchPageButtonClick)
-
-
         # 设置表格属性
-        # self.tableView = QTableView()
         # 表格宽度的自适应调整
         self.tableView.horizontalHeader().setStretchLastSection(True)
         self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
     def setTableView(self):
-        # print('*** step2 SetTableView')
+        print('*** step2 SetTableView')
 
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
         self.dataModel = QSqlQueryModel(self)
-    #     self.reset_table_view()
-    # def reset_table_view(self):
         self.ceate_table()
         # 设置当前页
         self.currentPage = 1
@@ -80,7 +68,6 @@ class mainCelled( QDialog,Ui_Form):
         # print('totalPage=' + str(self.totalPage))
         self.updateStatus()
 
-
         # 设置表格表头
         self.queryModel.setHeaderData(0, Qt.Orientation.Horizontal, "id")
         self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "编号")
@@ -90,9 +77,10 @@ class mainCelled( QDialog,Ui_Form):
         self.queryModel.setHeaderData(5, Qt.Orientation.Horizontal, "采样日期")
         self.queryModel.setHeaderData(6, Qt.Orientation.Horizontal, "风险区间")
         self.queryModel.setHeaderData(7, Qt.Orientation.Horizontal, "风险值")
-
+    # 先判断表格是否存在，否则创建表格
     def ceate_table(self):
         self.query = QSqlQuery()
+        print('create db ')
         self.query.exec("create table if not exists  patient_info(id integer primary key AUTOINCREMENT ,"
                         " sample_code vchar,"
                         "name vchar, "

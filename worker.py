@@ -7,7 +7,7 @@ import time,json
 import pandas
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 
-
+# 以进程的方式生成报告
 class WorkerThread(QThread):
     signal = pyqtSignal(str)
     # signal = pyqtSignal()
@@ -34,12 +34,6 @@ class WorkerThread(QThread):
             self.insert_tb(results)
             content += sample_path[2]+'\n'
             self.signal.emit(content)
-            # time.sleep(10)
-            # self.signal.emit()
-
-        # time.sleep(2)
-        # print('running ---2')
-        # print('will insert ')
 
 
 # 将两个excel表格的内容，每个样本分别提取出来作为一个excel表格，
@@ -48,7 +42,7 @@ class WorkerThread(QThread):
         bdf = pd.read_excel(Bxlsx)
         a_sample_lst = []
         b_sample_lst = []
-        # 将A表内容分别保存为json
+        # 将A表内容每个样品分别保存为json
         for i in range(len(adf)):
             sample_code = adf.iloc[i, :].loc['sample_code']
             a_sample_lst.append(sample_code)
@@ -85,6 +79,7 @@ class WorkerThread(QThread):
                    [os.path.join(result_out_dir, sample_code, sample_code + '_Btable.xlsx') for sample_code in both2table_sampel],
                    both2table_sampel )
 
+    # 将报告结果更新或者插入数据库
     def insert_tb(self,results):
         # 声明数据库查询对象
         self.query = QSqlQuery(self.db)
@@ -115,13 +110,3 @@ class WorkerThread(QThread):
         # self.db.close()
         print('finish insert ')
 
-
-    def ceate_table(self):
-        self.query.exec("create table patient_info(id int primary key AUTOINCREMENT,"
-                        " sample_code vchar,"
-                        "name vchar, "
-                        "gender_desc vchar, "
-                        "birthday vchar, "
-                        "sample_date vchar,"
-                        "risk vchar,"
-                        "predict_pls vchar)")

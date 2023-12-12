@@ -11,6 +11,7 @@ from worker import WorkerThread
 # from DBdataView import DBdataView
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 # from Ui_ARpt_MainWindow import Ui_MainWindow
+from test_data_view import mainCelled
 
 from time import sleep
 
@@ -21,7 +22,12 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
     def __init__(self, parent=None):
         super(ARptWindow, self).__init__(parent)
         self.setupUi(self)
-
+        # self.setWindowIcon(QIcon)
+        # self.verticalLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # self.container = QWidget()
+        # self.container.setLayout(self.verticalLayout)
+        # self.setCentralWidget(self.container)
+        # self.centralwidget.setLayout(self.verticalLayout)
         self.btnOpenInfo.clicked.connect(lambda : self.getfiles('A'))
         self.btnOpenValue.clicked.connect(lambda : self.getfiles('B'))
         self.btnReport.clicked.connect(self.open_folder)
@@ -32,12 +38,15 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.label_value.setVisible(False)
         self.info_file=''
         self.value_file=''
-        # self.db=''
+
         self.db = QSqlDatabase.addDatabase('QSQLITE')
         # 设置数据库名称
         self.db.setDatabaseName('./db/database.db')
         # 打开数据库
         self.db.open()
+        self.table_dialog = mainCelled(self.db)
+
+        self.lbl_finish.setWordWrap(True)
 
         workdir = os.path.abspath(os.path.dirname(__file__))
         self.reports_result = os.path.join(workdir,'reports_result')
@@ -50,19 +59,13 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
             self.btnGenerateReport.setEnabled(True)
         else:
             self.btnGenerateReport.setEnabled(False)
-        # self.init_dataview()
-        # self.initUI()
+
         self.btnTestReport.clicked.connect(self.test_generate_report_table)
         self.btnShowPatientInfo.clicked.connect(self.show_patient_info)
     def show_patient_info(self):
-
-        from test_data_view import mainCelled
-        dialog = mainCelled(self.db)
-        dialog.exec()
-
+        self.table_dialog.exec()
 
     def getfiles(self,value='A'):
-
         file, _ = QFileDialog.getOpenFileName(self, caption='选择多个文件', directory=os.path.abspath('.'),
                                                          filter="Excel  (*.xlsx *.xls)")
         if not file:
@@ -71,7 +74,6 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
             self.info_file = file
         else :
             self.value_file = file
-
         self.label_info.setText(os.path.basename(self.info_file))
         self.label_value.setText(os.path.basename(self.value_file))
         self.label_info.setVisible(True)
@@ -87,7 +89,9 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.thread = WorkerThread(self.info_file, self.value_file, self.reports_result,self.db)
         self.thread.started.connect(self.runing_state)
         self.thread.finished.connect(self.finished_state)
-        self.thread.signal.connect(self.finished_state_update_table)
+        self.lbl_finish.setText('准备生成报告，请稍后。。。')
+        self.thread.signal.connect(self.finished_single_report_state)
+        self.thread.signal.connect(self.table_dialog.setTableView )
         self.thread.start()
         # print('generate_reporting ccc')
 
@@ -102,24 +106,23 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.value_file = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/尿结石表B：数据集.xlsx'
         self.reports_result = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/reports_result'
         self.generate_report()
-        # pass
+
+    # 全部状态完成后提示
     def finished_state(self):
         self.btnGenerateReport.setEnabled(True)
         self.lbl_report_status.setText("<font color=green size=2><b>报告已全部完成!</b></font>")
-        # self.btnOpenFile.setEnabled(True)
-        # self.setTableView()
-        # self.updateStatus()
-        # print('after time3')
 
-        # self.tableView.reset()
-
-    def finished_state_update_table(self,content):
+    # 单份报告的状态改变：
+    def finished_single_report_state(self,content):
         self.lbl_finish.setText(content)
+        # 自动调整label大小
+        self.lbl_finish.adjustSize()
+
         # self.btnOpenFile.setEnabled(True)
         # self.updateStatus()
         # print('after time3')
         # self.tableView.reset()
-
+    # 打开报告所在目录
     def open_folder(self):
         # print('open1')
         path = os.path.abspath(self.reports_result)

@@ -9,11 +9,14 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Form(object):
-    def setupUi(self, Form):
-        Form.setObjectName("Form")
-        Form.resize(843, 655)
-        self.verticalLayoutWidget_2 = QtWidgets.QWidget(Form)
+class Ui_widget(object):
+    def setupUi(self, widget):
+        widget.setObjectName("widget")
+        widget.resize(843, 655)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("images/logo.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        widget.setWindowIcon(icon)
+        self.verticalLayoutWidget_2 = QtWidgets.QWidget(widget)
         self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(20, 60, 811, 491))
         self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
@@ -63,17 +66,17 @@ class Ui_Form(object):
         self.statusLayout.addWidget(self.totalRecordLabel)
         self.verticalLayout_2.addLayout(self.statusLayout)
 
-        self.retranslateUi(Form)
-        QtCore.QMetaObject.connectSlotsByName(Form)
+        self.retranslateUi(widget)
+        QtCore.QMetaObject.connectSlotsByName(widget)
 
-    def retranslateUi(self, Form):
+    def retranslateUi(self, widget):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
-        self.prevButton.setText(_translate("Form", "前一页"))
-        self.nextButton.setText(_translate("Form", "后一页"))
-        self.switchPage.setText(_translate("Form", "跳转到"))
-        self.page.setText(_translate("Form", "页"))
-        self.switchPageButton.setText(_translate("Form", "go"))
-        self.totalPageLabel.setText(_translate("Form", "TextLabel"))
-        self.currentPageLabel.setText(_translate("Form", "TextLabel"))
-        self.totalRecordLabel.setText(_translate("Form", "TextLabel"))
+        widget.setWindowTitle(_translate("widget", "数据库"))
+        self.prevButton.setText(_translate("widget", "前一页"))
+        self.nextButton.setText(_translate("widget", "后一页"))
+        self.switchPage.setText(_translate("widget", "跳转到"))
+        self.page.setText(_translate("widget", "页"))
+        self.switchPageButton.setText(_translate("widget", "go"))
+        self.totalPageLabel.setText(_translate("widget", "TextLabel"))
+        self.currentPageLabel.setText(_translate("widget", "TextLabel"))
+        self.totalRecordLabel.setText(_translate("widget", "TextLabel"))

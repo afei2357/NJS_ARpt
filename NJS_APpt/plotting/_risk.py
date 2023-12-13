@@ -5,7 +5,8 @@ import os
 
 from typing import  Optional
 from matplotlib.axes import Axes
-
+import matplotlib
+matplotlib.use("Agg")
 
 workdir = os.path.abspath(os.path.dirname(__file__))
 

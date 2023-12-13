@@ -7,6 +7,13 @@ import time,json
 import pandas
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 
+
+
+import logging.config
+import logging
+logging.config.fileConfig('logging.ini')
+logger = logging.getLogger('worker')
+
 # 以进程的方式生成报告
 class WorkerThread(QThread):
     signal = pyqtSignal(str)
@@ -21,14 +28,14 @@ class WorkerThread(QThread):
         self.js_file = os.path.join(reports_result,f'{basename}.json')
 
     def run(self):
-        print('\n running ---1')
+        logger.info('\n running ---1')
         # 从两个excel里提取A表、B表的信息
         sample_list_AB_table_path  = self.get_sub_xlsx(self.info_file,self.value_file,self.reports_result)
-        # print('will run generate ')
+        # logger.info('will run generate ')
         content = '已完成报告：\n'
-        print(sample_list_AB_table_path)
+        logger.info(sample_list_AB_table_path)
         for sample_path in sample_list_AB_table_path:
-            print(sample_path)
+            logger.info(sample_path)
             results = run_rpt(sample_path[1],sample_path[0], self.reports_result)
             self.insert_tb(results)
             content += sample_path[2]+'\n'
@@ -64,15 +71,15 @@ class WorkerThread(QThread):
         for i in range(len(bdf)):
             sample_code = bdf.loc[i, :].loc[u'实验号']
             b_sample_lst.append(sample_code)
-            # print(sample_code)
+            # logger.info(sample_code)
             outdir = os.path.join(result_out_dir, sample_code)
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             b_outf_file = os.path.join(outdir, sample_code + '_Btable.xlsx')
             bdf.loc[i:i, :].to_excel(b_outf_file, index=False)
         both2table_sampel = set(a_sample_lst) & set(b_sample_lst)
-        print('both2table_sampel')
-        print(both2table_sampel)
+        # logger.info('both2table_sampel')
+        logger.info(both2table_sampel)
 
         return zip([os.path.join(result_out_dir, sample_code, sample_code + '_Atable.json') for sample_code in both2table_sampel],
                    [os.path.join(result_out_dir, sample_code, sample_code + '_Btable.xlsx') for sample_code in both2table_sampel],
@@ -90,23 +97,32 @@ class WorkerThread(QThread):
         sampling_time = results['info'].get('sampling_time')
         risk = results['predict_risk'].get('risk')
         predict_pls = results['predict_risk'].get('predict_pls')
-        print('risk,predict_pls')
-        print(risk,predict_pls)
+        # logger.info('risk,predict_pls')
+        logger.info(str(risk))
+        logger.info(str(predict_pls))
         # 查询某个样本是否已经存在数据库，如果存在就更新它的信息，否则新增样本
         self.query.exec(f"select 1 from patient_info where sample_code='{sample_code}'; ")
+        logger.info(str(sample_code))
+        logger.info(type(results))
+        print(results)
+        print(json.dumps(results['info']))
+
+
         if self.query.next():
-            ok = self.query.exec(f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
+            ok1 = self.query.exec(f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
                             f" where sample_code='{sample_code}' ;")
+            # ok2 = self.query.exec(f"update patient_results set results='{json.dumps(results['info']) }' "
+            #                 f" where sample_code='{sample_code}' ;")
         else:
-            ok = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls) "
+            ok1 = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls) "
                              f" values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
-        if not ok:
-            print('Error : ',self.query.lastError() .text() )
-        # print('self.query.result()')
-        # print(self.query.result())
-        # print(ok )
-        # print('self.query.lastError().text()')
-        # print(self.query.lastError().text())
-        # # self.db.close()
-        # print('finish insert ')
+            # ok2 = self.query.exec(f"insert into patient_results (sample_code,results) "
+            #                  f" values('{sample_code}','{json.dumps(results['info'])}')")
+        if not ok1:
+            logger.info('Error : ',self.query.lastError().text() )
+        logger.info(self.query.result())
+        logger.info(self.query.lastError().text())
+
+        # logger.info(ok )
+
 

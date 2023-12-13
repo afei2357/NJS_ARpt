@@ -3,12 +3,20 @@ from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 import re
 from PyQt6.QtWidgets import *
 from Ui_be_called import Ui_widget
+# import logging
+import logging.config
+
+logging.config.fileConfig('logging.ini')
+logger = logging.getLogger('worker')
+# logger.info('bbbbb')
 
 
 class mainCelled( QDialog,Ui_widget):
     def __init__(self, db,parent=None):
         super(mainCelled, self).__init__(parent)
         self.setupUi(self)
+        logger.info('bbbbb')
+
         # self.btnCall.clicked.connect(self.open_diallog)
         # 查询模型
         self.queryModel = None
@@ -39,7 +47,7 @@ class mainCelled( QDialog,Ui_widget):
         self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
     def setTableView(self):
-        print('*** step2 SetTableView')
+        logger.info('*** step2 SetTableView')
 
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
@@ -51,7 +59,7 @@ class mainCelled( QDialog,Ui_widget):
         self.totalRecrodCount = self.getTotalRecordCount()
         # 得到总页数
         self.totalPage = self.getPageCount()
-        # print('----total page:')
+        # logger.info('----total page:')
 
         # 刷新状态
         # self.updateStatus()
@@ -64,8 +72,8 @@ class mainCelled( QDialog,Ui_widget):
         # 设置模型
         self.tableView.setModel(self.queryModel)
 
-        # print('totalRecrodCount=' + str(self.totalRecrodCount))
-        # print('totalPage=' + str(self.totalPage))
+        # logger.info('totalRecrodCount=' + str(self.totalRecrodCount))
+        # logger.info('totalPage=' + str(self.totalPage))
         self.updateStatus()
 
         # 设置表格表头
@@ -80,7 +88,12 @@ class mainCelled( QDialog,Ui_widget):
     # 先判断表格是否存在，否则创建表格
     def ceate_table(self):
         self.query = QSqlQuery()
-        print('create db ')
+        logger.info('create db ')
+        # # patient_results 只用于保存输入的详细信息
+        # self.query.exec("create table if not exists  patient_results (id integer primary key AUTOINCREMENT ,"
+        #                 "sample_code vchar,"
+        #                 "results vchar)")
+        # patient_info 用于保存输入结果信息和展示给用户看
         self.query.exec("create table if not exists  patient_info(id integer primary key AUTOINCREMENT ,"
                         " sample_code vchar,"
                         "name vchar, "
@@ -95,13 +108,13 @@ class mainCelled( QDialog,Ui_widget):
         self.queryModel.setQuery("select * from patient_info")
 
         rowCount = self.queryModel.rowCount()
-        # print('rowCount==' + str(rowCount))
+        # logger.info('rowCount==' + str(rowCount))
         return rowCount
 
     # 得到页数
     def getPageCount(self):
-        # print('self.totalRecrodCount, self.PageRecordCount')
-        # print(self.totalRecrodCount, self.PageRecordCount)
+        # logger.info('self.totalRecrodCount, self.PageRecordCount')
+        # logger.info(self.totalRecrodCount, self.PageRecordCount)
         if self.totalRecrodCount % self.PageRecordCount == 0:
             # 地板除
             return (self.totalRecrodCount // self.PageRecordCount)
@@ -111,15 +124,15 @@ class mainCelled( QDialog,Ui_widget):
     # 记录查询
     def recordQuery(self, limitIndex):
         szQuery = ("select * from patient_info limit %d,%d" % (limitIndex, self.PageRecordCount))
-        # print('query sql=' + szQuery)
+        # logger.info('query sql=' + szQuery)
         self.queryModel.setQuery(szQuery)
 
     # 刷新状态
     def updateStatus(self):
         szCurrentText = ("当前第%d页" % self.currentPage)
         self.currentPageLabel.setText(szCurrentText)
-        # print('self.currentPage == self.totalPage------------')
-        # print(self.currentPage , self.totalPage)
+        # logger.info('self.currentPage == self.totalPage------------')
+        # logger.info(self.currentPage , self.totalPage)
         # 设置按钮是否可用
         if self.currentPage <= 1:
             self.prevButton.setEnabled(False)
@@ -138,12 +151,12 @@ class mainCelled( QDialog,Ui_widget):
     # 设置总记录数
     def setTotalRecordLabel(self):
         szTotalRecordText = ("共%d条" % self.totalRecrodCount)
-        # print('*** setTotalRecordLabel szTotalRecordText=' + szTotalRecordText)
+        # logger.info('*** setTotalRecordLabel szTotalRecordText=' + szTotalRecordText)
         self.totalRecordLabel.setText(szTotalRecordText)
 
     # 前一页按钮按下
     def onPrevButtonClick(self):
-        # print('*** onPrevButtonClick ');
+        # logger.info('*** onPrevButtonClick ');
         limitIndex = (self.currentPage - 2) * self.PageRecordCount
         self.recordQuery(limitIndex)
         self.currentPage -= 1
@@ -151,19 +164,19 @@ class mainCelled( QDialog,Ui_widget):
 
     # 后一页按钮按下
     def onNextButtonClick(self):
-        # print('*** onNextButtonClick ')
+        # logger.info('*** onNextButtonClick ')
         limitIndex = self.currentPage * self.PageRecordCount
         self.recordQuery(limitIndex)
         self.currentPage += 1
         self.updateStatus()
-        # print('next click ----------')
+        # logger.info('next click ----------')
 
     # 转到页按钮按下
     def onSwitchPageButtonClick(self):
         # 得到输入字符串
         szText = self.switchPageLineEdit.text()
-        # print('szText')
-        # print(szText)
+        # logger.info('szText')
+        # logger.info(szText)
         # 数字正则表达式
         pattern = re.compile(r'^[-+]?[0-9]+\.[0-9]+$')
         match = pattern.match(szText)

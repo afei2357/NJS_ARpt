@@ -1,5 +1,7 @@
 import sys,os,re
 import time
+if not os.path.exists('./logs/'):
+    os.makedirs('./logs/')
 
 # from PyQt5.QtWidgets import QApplication, QMainWindow
 from Ui_MainWindow import Ui_MainWindow
@@ -7,12 +9,16 @@ from Ui_MainWindow import Ui_MainWindow
 # # from PyQt6.QtGui import *
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
-from worker import WorkerThread
 # from DBdataView import DBdataView
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 # from Ui_ARpt_MainWindow import Ui_MainWindow
 from test_data_view import mainCelled
+# import logging
 import logging.config
+from worker import WorkerThread
+
+# if not os.path.exists('./logs/'):
+#     os.makedirs('./logs/')
 
 logging.config.fileConfig('logging.ini')
 main_logger = logging.getLogger('main')
@@ -26,6 +32,8 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
     def __init__(self, parent=None):
         super(ARptWindow, self).__init__(parent)
         self.setupUi(self)
+        main_logger.info('start ui ')
+
         # self.setWindowIcon(QIcon)
         # self.verticalLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # self.container = QWidget()
@@ -46,6 +54,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.db = QSqlDatabase.addDatabase('QSQLITE')
         if not os.path.exists('./db'):
             os.makedirs('./db')
+
         # 设置数据库名称
         self.db.setDatabaseName('./db/database.db')
         # 打开数据库
@@ -83,9 +92,9 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.label_value.setText(os.path.basename(self.value_file))
         self.label_info.setVisible(True)
         self.label_value.setVisible(True)
-        # print(self.info_file and self.value_file)
-        # print('self.info_file and self.value_file')
-        # print(self.info_file , self.value_file)
+        # main_logger.info(self.info_file and self.value_file)
+        # main_logger.info('self.info_file and self.value_file')
+        main_logger.info(self.info_file , self.value_file)
 
         if self.info_file and self.value_file:
             self.btnGenerateReport.setEnabled(True)
@@ -98,12 +107,12 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.thread.signal.connect(self.finished_single_report_state)
         self.thread.signal.connect(self.table_dialog.setTableView )
         self.thread.start()
-        # print('generate_reporting ccc')
+        # main_logger.info('generate_reporting ccc')
 
     def runing_state(self):
         self.btnGenerateReport.setEnabled(False)
         # self.btnOpenFile.setEnabled(False)
-        # print('in state')
+        # main_logger.info('in state')
         self.lbl_report_status.setVisible(True)
         self.lbl_report_status.setText("<font color=red size=2><b>报告正在生成，请稍后...</b></font>")
     def test_generate_report_table(self):
@@ -125,23 +134,23 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
 
         # self.btnOpenFile.setEnabled(True)
         # self.updateStatus()
-        # print('after time3')
+        # main_logger.info('after time3')
         # self.tableView.reset()
     # 打开报告所在目录
     def open_folder(self):
-        # print('open1')
+        # main_logger.info('open1')
         path = os.path.abspath(self.reports_result)
-        # print('path')
-        # print(path)
+        # main_logger.info('path')
+        # main_logger.info(path)
         if os.path.exists(path):
             os.startfile(path)
         else:
             QMessageBox.information(self, '错误', '路径不存在，请检查', QMessageBox.Yes)
-        # print('open2')
+        # main_logger.info('open2')
 
     def show_message(self):
         reply = QMessageBox.information(self, '错误', '必须为xlsx或者json结尾的文件', QMessageBox.Yes | QMessageBox.No)
-        # print(reply)
+        # main_logger.info(reply)
 
 
 if __name__ == '__main__':

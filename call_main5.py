@@ -40,6 +40,8 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.value_file=''
 
         self.db = QSqlDatabase.addDatabase('QSQLITE')
+        if not os.path.exists('./db'):
+            os.makedirs('./db')
         # 设置数据库名称
         self.db.setDatabaseName('./db/database.db')
         # 打开数据库
@@ -50,8 +52,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
 
         workdir = os.path.abspath(os.path.dirname(__file__))
         self.reports_result = os.path.join(workdir,'reports_result')
-        # print('self.reports_result ')
-        # print(self.reports_result )
+
         if not os.path.exists(self.reports_result):
             os.makedirs(self.reports_result)
 

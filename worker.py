@@ -22,13 +22,12 @@ class WorkerThread(QThread):
 
     def run(self):
         print('\n running ---1')
+        # 从两个excel里提取A表、B表的信息
         sample_list_AB_table_path  = self.get_sub_xlsx(self.info_file,self.value_file,self.reports_result)
         # print('will run generate ')
         content = '已完成报告：\n'
         print(sample_list_AB_table_path)
         for sample_path in sample_list_AB_table_path:
-            # self.signal.emit( ' 正在生成报告中，请等待---')
-            # self.signal.emit(sample_path+'正常生成')
             print(sample_path)
             results = run_rpt(sample_path[1],sample_path[0], self.reports_result)
             self.insert_tb(results)
@@ -93,6 +92,7 @@ class WorkerThread(QThread):
         predict_pls = results['predict_risk'].get('predict_pls')
         print('risk,predict_pls')
         print(risk,predict_pls)
+        # 查询某个样本是否已经存在数据库，如果存在就更新它的信息，否则新增样本
         self.query.exec(f"select 1 from patient_info where sample_code='{sample_code}'; ")
         if self.query.next():
             ok = self.query.exec(f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
@@ -102,11 +102,11 @@ class WorkerThread(QThread):
                              f" values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
         if not ok:
             print('Error : ',self.query.lastError() .text() )
-        print('self.query.result()')
-        print(self.query.result())
-        print(ok )
-        print('self.query.lastError().text()')
-        print(self.query.lastError().text())
-        # self.db.close()
-        print('finish insert ')
+        # print('self.query.result()')
+        # print(self.query.result())
+        # print(ok )
+        # print('self.query.lastError().text()')
+        # print(self.query.lastError().text())
+        # # self.db.close()
+        # print('finish insert ')
 

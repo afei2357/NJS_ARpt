@@ -93,6 +93,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.lbl_finish.setText('准备生成报告，请稍后。。。')
         self.thread.signal.connect(self.finished_single_report_state)
         self.thread.signal.connect(self.table_dialog.setTableView )
+        self.thread.info_signal.connect(self.thread_info_func)
         self.thread.start()
         main_logger.info(' self.thread.start' )
 
@@ -114,29 +115,32 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
     # 全部状态完成后提示
     def finished_state(self):
         self.btnGenerateReport.setEnabled(True)
-        self.lbl_report_status.setText("<font color=green size=2><b>报告已全部完成!</b></font>")
+        self.lbl_report_status.setText("<font color=green size=2><b>报告任务已结束!</b></font>")
 
     # 单份报告的状态改变：
     def finished_single_report_state(self,content):
         self.lbl_finish.setText(content)
         # 自动调整label大小
         self.lbl_finish.adjustSize()
-
+    def thread_info_func(self,content):
+        QMessageBox.question(self,'错误', '路径不存在，请检查')
 
     # 打开报告所在目录
     def open_folder(self):
         # main_logger.info('open1')
         path = os.path.abspath(self.reports_result)
-        # main_logger.info('path')
-        # main_logger.info(path)
+        main_logger.info(path)
+
         if os.path.exists(path):
             os.startfile(path)
         else:
-            QMessageBox.information(self, '错误', '路径不存在，请检查', QMessageBox.Yes)
+            main_logger.info(path)
+            QMessageBox.warning(self,'路径错误','路径不存在，请检查')
+        return
         # main_logger.info('open2')
 
     def show_message(self):
-        reply = QMessageBox.information(self, '错误', '必须为xlsx或者json结尾的文件', QMessageBox.Yes | QMessageBox.No)
+        reply = QMessageBox.information(self, '错误', '必须为xlsx或者json结尾的文件')
         # main_logger.info(reply)
 
 

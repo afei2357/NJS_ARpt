@@ -59,14 +59,14 @@
        <item row="0" column="0">
         <widget class="QPushButton" name="btnOpenInfo">
          <property name="text">
-          <string>选择信息表</string>
+          <string>信息表(A表)</string>
          </property>
         </widget>
        </item>
        <item row="0" column="2">
         <widget class="QPushButton" name="btnOpenValue">
          <property name="text">
-          <string>选择检测结果表</string>
+          <string>检测结果表(B表)</string>
          </property>
         </widget>
        </item>

@@ -3,8 +3,9 @@ from PyQt6.QtCore import QThread
 from PyQt6.QtCore import pyqtSignal
 from reporter import *
 import json
-from PyQt6.QtSql import  QSqlQuery
+from PyQt6.QtSql import QSqlQuery
 import configparser
+from PyQt6.QtWidgets import QMessageBox
 
 
 import logging.config
@@ -15,6 +16,7 @@ logger = logging.getLogger('worker')
 # 以进程的方式生成报告
 class WorkerThread(QThread):
     signal = pyqtSignal(str)
+    info_signal = pyqtSignal(str)
     # signal = pyqtSignal()
     def __init__(self,info_file,value_file,reports_result,db):
         super(WorkerThread,self).__init__()
@@ -27,8 +29,12 @@ class WorkerThread(QThread):
 
     def run(self):
         logger.info('\n running ---1')
+        self.adf = pd.read_excel(self.info_file, dtype=str)
+        self.bdf = pd.read_excel(self.value_file)
+        if not self.get_ABtable_headers() :
+            return
         # 从两个excel里提取A表、B表的信息
-        sample_list_AB_table_path  = self.get_sub_xlsx(self.info_file,self.value_file,self.reports_result)
+        sample_list_AB_table_path  = self.get_sub_xlsx(self.reports_result)
         # logger.info('will run generate ')
         content = '已完成报告：\n'
         logger.info(sample_list_AB_table_path)
@@ -41,20 +47,18 @@ class WorkerThread(QThread):
 
 
 # 将两个excel表格的内容，每个样本分别提取出来作为一个excel表格，
-    def get_sub_xlsx(self,Axlsx, Bxlsx, result_out_dir):
-        adf = pd.read_excel(Axlsx, dtype=str)
-        bdf = pd.read_excel(Bxlsx)
+    def get_sub_xlsx(self,result_out_dir):
         a_sample_lst = []
         b_sample_lst = []
         # 将A表内容每个样品分别保存为json
-        for i in range(len(adf)):
-            sample_code = adf.iloc[i, :].loc['sample_code']
+        for i in range(len(self.adf)):
+            sample_code = self.adf.iloc[i, :].loc['sample_code']
             a_sample_lst.append(sample_code)
             outdir = os.path.join(result_out_dir, sample_code)
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             a_outf_file = os.path.join(outdir, sample_code + '_Atable.json')
-            df_dct = adf.loc[i].to_dict()
+            df_dct = self.adf.loc[i].to_dict()
             js_dct = {}
             info_dct = {}
             for k, v in df_dct.items():
@@ -66,15 +70,15 @@ class WorkerThread(QThread):
             with open(a_outf_file, 'w', encoding='utf-8') as out:
                 json.dump(js_dct, out, indent=2, ensure_ascii=False)
         # 将B表内容分别保存为xlsx:
-        for i in range(len(bdf)):
-            sample_code = bdf.loc[i, :].loc[u'实验号']
+        for i in range(len(self.bdf)):
+            sample_code = self.bdf.loc[i, :].loc[u'实验号']
             b_sample_lst.append(sample_code)
             # logger.info(sample_code)
             outdir = os.path.join(result_out_dir, sample_code)
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             b_outf_file = os.path.join(outdir, sample_code + '_Btable.xlsx')
-            bdf.loc[i:i, :].to_excel(b_outf_file, index=False)
+            self.bdf.loc[i:i, :].to_excel(b_outf_file, index=False)
         both2table_sampel = set(a_sample_lst) & set(b_sample_lst)
         # logger.info('both2table_sampel')
         logger.info(both2table_sampel)
@@ -121,18 +125,23 @@ class WorkerThread(QThread):
         logger.info(self.query.result())
         logger.info(self.query.lastError().text())
 
-        # logger.info(ok )
-
+    # 判断两个表格的表头是否正确：
     def get_ABtable_headers(self):
         config = configparser.ConfigParser()
-        config = configparser.ConfigParser()
         config.read(u'./config/headers.ini', encoding='utf-8')
-        header_dict = {}
-        sections = config.sections()
-        for section in sections:
-            options = config.options(section)
-            for option in options:
-                value = config.get(section, option)
-                header_dict[option] = value
+        aheader = config['Atable']['headers']
+        bheader = config['Btable']['headers']
+        if not ( list(self.adf.columns) == aheader.split('|') and list(self.bdf.columns) == bheader.split('|') ) :
+            logger.info(list(self.adf.columns) == aheader.split('|'))
+            logger.info(list(self.bdf.columns) == bheader.split('|'))
+            content = ("<font color=red size=2><b>A  表 或者 B 表不对！ 请重新选择两个表!</b></font>")
+            # content =  'A表或者B表的表头不对！请重新选择两个表 '
+            logger.info('A  表 或者 B 表不对！ 请重新选择两个表 ')
+            # self.signal.emmit(content)
+            self.signal.emit(content)
+            self.info_signal.emit(content)
+            return False
+        return True
+
 
 

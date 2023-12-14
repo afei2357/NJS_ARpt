@@ -1,1 +1,1 @@
-pyinstaller    --add-data "NJS_APpt;NJS_APpt"  --add-data "images;images" call_main5.py
+ pyinstaller    --add-data "NJS_APpt;NJS_APpt"  --add-data "images;images"   --add-data "config;config" call_main6.py

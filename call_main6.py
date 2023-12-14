@@ -1,4 +1,4 @@
-import sys,os,re
+import sys,os
 import time
 if not os.path.exists('./logs/'):
     os.makedirs('./logs/')
@@ -7,10 +7,10 @@ if not os.path.exists('./logs/'):
 from Ui_MainWindow import Ui_MainWindow
 # from PyQt6.QtCore import *
 # # from PyQt6.QtGui import *
-from PyQt6.QtCore import Qt
+# from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
 # from DBdataView import DBdataView
-from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
+from PyQt6.QtSql import QSqlDatabase
 # from Ui_ARpt_MainWindow import Ui_MainWindow
 from test_data_view import mainCelled
 # import logging
@@ -20,7 +20,8 @@ from worker import WorkerThread
 # if not os.path.exists('./logs/'):
 #     os.makedirs('./logs/')
 
-logging.config.fileConfig('logging.ini')
+
+logging.config.fileConfig('./config/logging.ini')
 main_logger = logging.getLogger('main')
 
 from time import sleep

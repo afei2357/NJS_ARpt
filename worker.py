@@ -3,15 +3,15 @@ from PyQt6.QtCore import QThread
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 from reporter import *
-import time,json
-import pandas
+import json
+# import pandas
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 
 
 
 import logging.config
 import logging
-logging.config.fileConfig('logging.ini')
+logging.config.fileConfig('./config/logging.ini')
 logger = logging.getLogger('worker')
 
 # 以进程的方式生成报告
@@ -104,8 +104,8 @@ class WorkerThread(QThread):
         self.query.exec(f"select 1 from patient_info where sample_code='{sample_code}'; ")
         logger.info(str(sample_code))
         logger.info(type(results))
-        print(results)
-        print(json.dumps(results['info']))
+        # print(results)
+        # print(json.dumps(results['info']))
 
 
         if self.query.next():

@@ -8,8 +8,8 @@ import time
 import NJS_APpt as njs
 
 import logging
-# logging.config.fileConfig('logging.ini')
-logger = logging.getLogger(__name__)
+logging.config.fileConfig('./config/logging.ini')
+logger = logging.getLogger('worker')
 
 ARGS = argparse.ArgumentParser(description="遗传解读与报告")
 

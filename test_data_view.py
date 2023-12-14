@@ -1,12 +1,12 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
+from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery
 import re
-from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import QDialog,QHeaderView,QMessageBox
 from Ui_be_called import Ui_widget
 # import logging
 import logging.config
 
-logging.config.fileConfig('logging.ini')
+logging.config.fileConfig('./config/logging.ini')
 logger = logging.getLogger('worker')
 # logger.info('bbbbb')
 

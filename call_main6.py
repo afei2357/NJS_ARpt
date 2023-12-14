@@ -3,33 +3,19 @@ import time
 if not os.path.exists('./logs/'):
     os.makedirs('./logs/')
 
-# from PyQt5.QtWidgets import QApplication, QMainWindow
 from Ui_MainWindow import Ui_MainWindow
-# from PyQt6.QtCore import *
-# # from PyQt6.QtGui import *
-# from PyQt6.QtCore import Qt
+
 from PyQt6.QtWidgets import *
-# from DBdataView import DBdataView
 from PyQt6.QtSql import QSqlDatabase
-# from Ui_ARpt_MainWindow import Ui_MainWindow
-from test_data_view import mainCelled
-# import logging
+from DataViewCelled import DataViewCelled
 import logging.config
 from worker import WorkerThread
-
-# if not os.path.exists('./logs/'):
-#     os.makedirs('./logs/')
-
 
 logging.config.fileConfig('./config/logging.ini')
 main_logger = logging.getLogger('main')
 
-from time import sleep
 
-
-# class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):
 class ARptWindow( QMainWindow,Ui_MainWindow):
-# class ARptWindow(QMainWindow,DBdataView):
     def __init__(self, parent=None):
         super(ARptWindow, self).__init__(parent)
         self.setupUi(self)
@@ -60,7 +46,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.db.setDatabaseName('./db/database.db')
         # 打开数据库
         self.db.open()
-        self.table_dialog = mainCelled(self.db)
+        self.table_dialog = DataViewCelled(self.db)
 
         self.lbl_finish.setWordWrap(True)
 
@@ -74,7 +60,8 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
             self.btnGenerateReport.setEnabled(True)
         else:
             self.btnGenerateReport.setEnabled(False)
-
+        # btnTestReport 按钮仅用于方便测试，软件发布之后将其设置为不可见。
+        self.btnTestReport.setVisible(False)
         self.btnTestReport.clicked.connect(self.test_generate_report_table)
         self.btnShowPatientInfo.clicked.connect(self.show_patient_info)
     def show_patient_info(self):
@@ -93,9 +80,8 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.label_value.setText(os.path.basename(self.value_file))
         self.label_info.setVisible(True)
         self.label_value.setVisible(True)
-        # main_logger.info(self.info_file and self.value_file)
-        # main_logger.info('self.info_file and self.value_file')
-        main_logger.info(self.info_file , self.value_file)
+        main_logger.info(self.info_file )
+        main_logger.info(self.value_file)
 
         if self.info_file and self.value_file:
             self.btnGenerateReport.setEnabled(True)
@@ -108,6 +94,8 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.thread.signal.connect(self.finished_single_report_state)
         self.thread.signal.connect(self.table_dialog.setTableView )
         self.thread.start()
+        main_logger.info(' self.thread.start' )
+
         # main_logger.info('generate_reporting ccc')
 
     def runing_state(self):
@@ -116,6 +104,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         # main_logger.info('in state')
         self.lbl_report_status.setVisible(True)
         self.lbl_report_status.setText("<font color=red size=2><b>报告正在生成，请稍后...</b></font>")
+    # 如下函数仅用于方便测试
     def test_generate_report_table(self):
         self.info_file = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/表A.xlsx'
         self.value_file = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/尿结石表B：数据集.xlsx'
@@ -133,10 +122,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         # 自动调整label大小
         self.lbl_finish.adjustSize()
 
-        # self.btnOpenFile.setEnabled(True)
-        # self.updateStatus()
-        # main_logger.info('after time3')
-        # self.tableView.reset()
+
     # 打开报告所在目录
     def open_folder(self):
         # main_logger.info('open1')

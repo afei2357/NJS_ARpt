@@ -8,12 +8,11 @@ import logging.config
 
 logging.config.fileConfig('./config/logging.ini')
 logger = logging.getLogger('worker')
-# logger.info('bbbbb')
 
-
-class mainCelled( QDialog,Ui_widget):
+# 配置显示数据接口界面的
+class DataViewCelled( QDialog,Ui_widget):
     def __init__(self, db,parent=None):
-        super(mainCelled, self).__init__(parent)
+        super(DataViewCelled, self).__init__(parent)
         self.setupUi(self)
         logger.info('bbbbb')
 

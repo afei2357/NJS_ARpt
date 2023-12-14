@@ -1,12 +1,10 @@
 
 from PyQt6.QtCore import QThread
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 from reporter import *
 import json
-# import pandas
-from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
-
+from PyQt6.QtSql import  QSqlQuery
+import configparser
 
 
 import logging.config
@@ -124,5 +122,17 @@ class WorkerThread(QThread):
         logger.info(self.query.lastError().text())
 
         # logger.info(ok )
+
+    def get_ABtable_headers(self):
+        config = configparser.ConfigParser()
+        config = configparser.ConfigParser()
+        config.read(u'./config/headers.ini', encoding='utf-8')
+        header_dict = {}
+        sections = config.sections()
+        for section in sections:
+            options = config.options(section)
+            for option in options:
+                value = config.get(section, option)
+                header_dict[option] = value
 
 

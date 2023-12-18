@@ -132,6 +132,19 @@
     </item>
    </layout>
   </widget>
+  <widget class="QPushButton" name="btnExportInfo">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>590</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>导出数据</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

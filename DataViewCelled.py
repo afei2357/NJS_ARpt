@@ -3,8 +3,12 @@ from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery
 import re
 from PyQt6.QtWidgets import QDialog,QHeaderView,QMessageBox
 from Ui_be_called import Ui_widget
+from PyQt6.QtWidgets import QFileDialog
+import os
 # import logging
 import logging.config
+import sqlite3
+import pandas as pd
 
 logging.config.fileConfig('./config/logging.ini')
 logger = logging.getLogger('worker')
@@ -14,7 +18,7 @@ class DataViewCelled( QDialog,Ui_widget):
     def __init__(self, db,parent=None):
         super(DataViewCelled, self).__init__(parent)
         self.setupUi(self)
-        logger.info('bbbbb')
+        logger.info('start DataViewCelled')
 
         # self.btnCall.clicked.connect(self.open_diallog)
         # 查询模型
@@ -40,6 +44,8 @@ class DataViewCelled( QDialog,Ui_widget):
         self.prevButton.clicked.connect(self.onPrevButtonClick)
         self.nextButton.clicked.connect(self.onNextButtonClick)
         self.switchPageButton.clicked.connect(self.onSwitchPageButtonClick)
+        self.btnExportInfo.clicked.connect(self.exportInfo)
+
         # 设置表格属性
         # 表格宽度的自适应调整
         self.tableView.horizontalHeader().setStretchLastSection(True)
@@ -50,7 +56,7 @@ class DataViewCelled( QDialog,Ui_widget):
 
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
-        self.dataModel = QSqlQueryModel(self)
+        # self.dataModel = QSqlQueryModel(self)
         self.ceate_table()
         # 设置当前页
         self.currentPage = 1
@@ -199,11 +205,21 @@ class DataViewCelled( QDialog,Ui_widget):
 
         # 得到查询起始行号
         limitIndex = (pageIndex - 1) * self.PageRecordCount
-
         # 记录查询
         self.recordQuery(limitIndex);
         # 设置当前页
         self.currentPage = pageIndex
         # 刷新状态
         self.updateStatus();
-
+    #导出所有
+    def exportInfo(self):
+        export_full_path,_ = QFileDialog.getSaveFileName(self,'保存为',".","Excel(*.xlsx)")
+        if not  export_full_path:
+            QMessageBox.warning(self,'路径出错','请选择导出路径')
+            return
+        with sqlite3.connect('./db/database.db') as con:
+            c = con.cursor()
+            df = pd.read_sql('select * from patient_info', con=con)
+            logger.info(export_full_path)
+            df.to_excel(export_full_path, index=False)
+        QMessageBox.information(self,'导出结果','导出成功')

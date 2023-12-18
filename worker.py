@@ -106,20 +106,19 @@ class WorkerThread(QThread):
         self.query.exec(f"select 1 from patient_info where sample_code='{sample_code}'; ")
         logger.info(str(sample_code))
         logger.info(type(results))
-        # print(results)
-        # print(json.dumps(results['info']))
 
-
-        if self.query.next():
-            ok1 = self.query.exec(f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
-                            f" where sample_code='{sample_code}' ;")
-            # ok2 = self.query.exec(f"update patient_results set results='{json.dumps(results['info']) }' "
-            #                 f" where sample_code='{sample_code}' ;")
-        else:
-            ok1 = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls) "
+        ok1 = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls) "
                              f" values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
-            # ok2 = self.query.exec(f"insert into patient_results (sample_code,results) "
-            #                  f" values('{sample_code}','{json.dumps(results['info'])}')")
+        # ok1 = self.query.exec(
+        #     f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
+        #     f" where sample_code='{sample_code}' ;")
+        # 不在判断是否已经存在，只要单击就生成新的报告
+        # if self.query.next():
+        #     ok1 = self.query.exec(f"update patient_info set name='{name}',gender_desc='{gender_desc}',birthday='{birthday}',sampling_time='{sampling_time}',risk='{risk}',predict_pls='{predict_pls}' "
+        #                     f" where sample_code='{sample_code}' ;")
+        # else:
+        #     ok1 = self.query.exec(f"insert into patient_info (sample_code,name,gender_desc,birthday,sampling_time,risk,predict_pls) "
+        #                      f" values('{sample_code}','{name}','{gender_desc}','{birthday}','{sampling_time}','{risk}','{predict_pls}')")
         if not ok1:
             logger.info('Error : ',self.query.lastError().text() )
         logger.info(self.query.result())

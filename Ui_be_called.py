@@ -65,6 +65,9 @@ class Ui_widget(object):
         self.totalRecordLabel.setObjectName("totalRecordLabel")
         self.statusLayout.addWidget(self.totalRecordLabel)
         self.verticalLayout_2.addLayout(self.statusLayout)
+        self.btnExportInfo = QtWidgets.QPushButton(widget)
+        self.btnExportInfo.setGeometry(QtCore.QRect(680, 590, 151, 31))
+        self.btnExportInfo.setObjectName("btnExportInfo")
 
         self.retranslateUi(widget)
         QtCore.QMetaObject.connectSlotsByName(widget)
@@ -80,3 +83,4 @@ class Ui_widget(object):
         self.totalPageLabel.setText(_translate("widget", "TextLabel"))
         self.currentPageLabel.setText(_translate("widget", "TextLabel"))
         self.totalRecordLabel.setText(_translate("widget", "TextLabel"))
+        self.btnExportInfo.setText(_translate("widget", "导出为excel"))

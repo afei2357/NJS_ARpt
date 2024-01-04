@@ -28,7 +28,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
 
         # self.setWindowIcon(QIcon)
         # self.verticalLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # self.container = QWidget()
+        # self.container = QWidget() 
         # self.container.setLayout(self.verticalLayout)
         # self.setCentralWidget(self.container)
         # self.centralwidget.setLayout(self.verticalLayout)
@@ -81,7 +81,7 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
 
     # 打开A表B表
     def getfiles(self,value='A'):
-        file, _ = QFileDialog.getOpenFileName(self, caption='选择多个文件', directory=os.path.abspath('.'),
+        file, _ = QFileDialog.getOpenFileName(self, caption='选择单个excel文件', directory=os.path.abspath('.'),
                                                          filter="Excel  (*.xlsx *.xls)")
         if not file:
             return

@@ -164,3 +164,6 @@ db/
 
 input/
 __pycache__/
+报证材料/
+test/
+test_input/

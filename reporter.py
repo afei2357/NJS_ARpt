@@ -49,9 +49,9 @@ def run_rpt(data_fi, sample_fi, outdir):
     # logger.info('results---')
     # logger.info(results)
     ## 生成报告
-    njs.report.todocx(results, outdir)
+    report_doc = njs.report.todocx(results, outdir)
 
-    return results
+    return results,report_doc
 
 
 def main():

@@ -11,3 +11,4 @@ def todocx(results,outdir):
     sample_code = results['info']['bar_code_no']
     time = datetime.datetime.now().strftime('%Y%m%d%H')
     tpl.save(f'{outdir}/{sample_code}.{time}.NJS.report.docx')
+    return  f'{outdir}/{sample_code}.{time}.NJS.report.docx'

@@ -1,3 +1,4 @@
+import os.path
 
 from PyQt6.QtCore import QThread
 from PyQt6.QtCore import pyqtSignal
@@ -6,7 +7,7 @@ import json
 from PyQt6.QtSql import QSqlQuery
 import configparser
 from PyQt6.QtWidgets import QMessageBox
-
+import shutil
 
 import logging.config
 import logging
@@ -37,10 +38,15 @@ class WorkerThread(QThread):
         sample_list_AB_table_path  = self.get_sub_xlsx(self.reports_result)
         # logger.info('will run generate ')
         content = '已完成报告：\n'
+        final_report_dir = os.path.join( self.reports_result , 'final_report_dir' )
+        if not os.path.exists(final_report_dir):
+            os.makedirs(final_report_dir)
         logger.info(sample_list_AB_table_path)
         for sample_path in sample_list_AB_table_path:
             logger.info(sample_path)
-            results = run_rpt(sample_path[1],sample_path[0], self.reports_result)
+            results,report_doc = run_rpt(sample_path[1],sample_path[0], self.reports_result)
+            # os.rename()
+            shutil.move(report_doc,final_report_dir)
             self.insert_tb(results)
             content += sample_path[2]+'\n'
             self.signal.emit(content)

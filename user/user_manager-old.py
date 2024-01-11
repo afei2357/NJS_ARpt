@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery,QSqlTableModel,QSqlRecord
+from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery,QSqlTableModel
 import re
 import sys,os
 from PyQt6.QtWidgets import *
@@ -15,23 +15,24 @@ from PyQt6.QtWidgets import QFileDialog
 
 import logging.config
 import logging
-
+# basedir = os.path.join( os.path.abspath(__file__) ,os.pardir,os.pardir)
+# print(basedir)
+# config_file = os.path.join(basedir,'config/logging.ini')
+# logging.config.fileConfig(config_file)
 config_path = './config/logging.ini'
 logging.config.fileConfig(config_path)
 logger = logging.getLogger('worker')
 
 
-class AddDialog(QDialog,add_Ui_Form):
-    # self.queryModel, selected_row
-    def __init__(self,model, row=-1,parent=None):
-        super(AddDialog, self).__init__(parent)
+class Add_User_Form(QDialog,add_Ui_Form):
+    def __init__(self,db, parent=None,id=None,username=None,password=None,role=None):
+        super(Add_User_Form, self).__init__(parent)
         self.setupUi(self)
-        self.model = model
-        self.row = row
+        self.db = db
+        self.query = QSqlQuery(self.db)
         # todo : 当出现编辑的情况下，id、user_data没有传递过去，导致 无法更新对应的条目，反而变成添加条目了。
         self.btn_add_ok.clicked.connect(self.insert_or_update_user)
         self.btn_add_cancle.clicked.connect(self.cancle_user)
-
     # 在编辑的时候，显示各个内容值
     def show_user_data_edit(self, user_data):
         logger.info('set data')
@@ -51,7 +52,44 @@ class AddDialog(QDialog,add_Ui_Form):
         self.insert_or_update_user(user_data)
 
 
+    def insert_or_update_user(self,user_data=None):
+        logging.info(self.input_password.text())
+        if not self.input_username.text() or not self.input_password.text():
+            QMessageBox.warning(self,'输入不全','用户名、密码不能为空')
+        if self.input_password.text() != self.input_password2.text() :
+            QMessageBox.warning(self, '确认密码有问题', '密码、确认密码必须相同')
+        logging.info('self.input_password.text()')
+        logger.info(user_data)
+        # logger.info(user_data.value('id'))
+        if self.check_password() :
+            if user_data and user_data.value('id'):
+                logger.info('in if ---------')
+                # 如果是已经存在数据库，则更新信息
+                id = user_data.value('id')
+                if self.radio_visitor.isChecked():
+                    role = 'visitor'
+                    logging.info(role)
+                    self.update_user2db(id, role)
+                    logging.info(role)
+                else:
+                    role = 'manager'
+                    self.update_user2db(id, role)
+            # 否则新增用户信息
+            else:
+                logger.info('in else ---------')
+                if self.radio_visitor.isChecked():
+                    role = 'visitor'
+                    logging.info(role)
+                    self.inser_user2db(role)
+                    logging.info(role)
+                if self.radio_manager.isChecked():
+                    role = 'manager'
+                    logging.info(role)
+                    self.inser_user2db(role)
 
+
+
+        self.close()
     def update_user2db(self,id,role):
         logger.info('set data')
         command = "update users set username='%s', password='%s', role='%s'  where id='%s' " % (self.input_username.text(), self.input_password.text(),role,id)
@@ -90,7 +128,8 @@ class Manager(QDialog,manager_Ui_form):
         super(Manager, self).__init__(parent)
         self.setupUi(self)
         logging.info('creat before')
-
+        # logger.info('start Manager')
+        # print('aaaaaa')
         self.db = db
         self.query = QSqlQuery(self.db)
         self.create_tb()
@@ -101,10 +140,9 @@ class Manager(QDialog,manager_Ui_form):
         # 查询模型
         # self.queryModel = None
         # 声明查询模型
-        # self.queryModel = QSqlQueryModel(self)
-        self.queryModel = QSqlTableModel(self)
-        self.queryModel.setTable('users')
-        self.queryModel.select()
+        self.queryModel = QSqlQueryModel(self)
+        # self.queryModel = QSqlTableModel(self)
+        # self.queryModel.setTable('users')
         # self.queryModel.setEditStrategy(QSqlTableModel.OnManualSubmit)  # 数据保存方式，OnManualSubmit , OnRowChange
         # self.dataModel = QSqlQueryModel(self)
         # 设置表头排序功能及表头样式
@@ -122,14 +160,13 @@ class Manager(QDialog,manager_Ui_form):
         self.db = db
         self.initUI()
 
-        #
-        # self.btn_add_user.clicked.connect(self.show_add_user)
-        # self.btn_modify_user.clicked.connect(self.show_modify_user)
-        # self.btn_delete_user.clicked.connect(self.show_delete_user)
 
-        self.btn_add_user.clicked.connect(self.onAdd)
-        # # self.btn_modify_user.clicked.connect(self.onEdit)
-        self.btn_delete_user.clicked.connect(self.onDelete)
+        self.btn_add_user.clicked.connect(self.show_add_user)
+        self.btn_modify_user.clicked.connect(self.show_modify_user)
+        self.btn_delete_user.clicked.connect(self.show_delete_user)
+
+
+
 
     # 数据库相关
     def initUI(self):
@@ -147,45 +184,8 @@ class Manager(QDialog,manager_Ui_form):
         # 表格宽度的自适应调整
         self.tableView.horizontalHeader().setStretchLastSection(True)
         self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-    def onAdd(self,data):
-        rows = self.queryModel.rowCount()
-        self.queryModel.insertRows(rows, 1)
-        for column, field in enumerate(data):
-            self.queryModel.setData(self.queryModel.index(rows, column + 1), field)
-        self.queryModel.submitAll()
-        self.queryModel.select()
 
-    def onAdd2(self):
-        selected_row = self.tableView.selectionModel().currentIndex().row()
 
-        if selected_row >= 0:
-            editor = AddDialog(self.queryModel, selected_row)
-            result = editor.exec()
-            print(result)
-            if result:
-                self.queryModel.select()
-    def onAdd1(self):
-        self.tableView.scrollToBottom()
-        rowCount = self.queryModel.rowCount()
-        self.queryModel.insertRow(rowCount)
-
-    # def onInsert(self):
-    #     index = self.tableView.currentIndex()
-    #     row = index.row()
-    #     self.queryModel.insertRow(row)
-
-    # ok
-    def onDelete(self):
-        row = self.tableView.currentIndex().row()
-        if row < 0:
-            return
-        messageBox = QMessageBox.question(self, 'Delete User', 'Are you sure you want to delete this user?',
-                                              QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        logger.info(messageBox)
-        if messageBox == QMessageBox.StandardButton.Yes:
-            self.queryModel.removeRow(row)
-            # self.queryModel.submitAll()
-            self.queryModel.select()
 
     def setTableView(self):
         logger.info('*** step2 SetTableView')
@@ -194,22 +194,9 @@ class Manager(QDialog,manager_Ui_form):
         self.ceate_table()
         # 设置模型
         self.tableView.setModel(self.queryModel)
-        # 表格宽度的自适应调整
-        self.tableView.horizontalHeader().setStretchLastSection(True)
-        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-
+        # self.queryModel.select()
         # 设置当前页
         self.currentPage = 1
-        # 设置表格表头
-        # self.queryModel.setHeaderData(0, Qt.Orientation.Horizontal, "id")
-        self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "姓名")
-        self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "角色")
-        self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "密码")
-        # 隐藏id
-        self.tableView.setColumnHidden(0,True)
-        # self.tableView.setColumnHidden(2,True)
-# todo
-    def test(self):
         # 得到总记录数
         self.totalRecrodCount = self.getTotalRecordCount()
         # 得到总页数
@@ -231,8 +218,13 @@ class Manager(QDialog,manager_Ui_form):
         logger.info('totalPage=' + str(self.totalPage))
         self.updateStatus()
 
-
-
+        # 设置表格表头
+        self.queryModel.setHeaderData(0, Qt.Orientation.Horizontal, "id")
+        self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "姓名")
+        self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "密码")
+        self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "角色")
+    # 隐藏密码
+    #     self.tableView.setColumnHidden({2})
     # 先判断表格是否存在，否则创建表格
     def ceate_table(self):
         self.query = QSqlQuery()
@@ -358,7 +350,7 @@ class Manager(QDialog,manager_Ui_form):
 
 
     def show_add_user(self):
-        form_add = AddDialog(self.db)
+        form_add = Add_User_Form(self.db)
         form_add.exec()
         logging.info('exec before')
 
@@ -378,7 +370,7 @@ class Manager(QDialog,manager_Ui_form):
             logger.info("bindvalue")
             self.query.exec()
             if self.query.next():
-                editor = AddDialog(self.db)
+                editor = Add_User_Form(self.db)
                 logger.info('editor')
                 logger.info(self.query.record())
                 editor.show_user_data_edit(self.query.record())

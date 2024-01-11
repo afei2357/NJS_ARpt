@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery
+from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery,QSqlTableModel
 import re
 import sys,os
 from PyQt6.QtWidgets import *
@@ -24,48 +24,83 @@ logging.config.fileConfig(config_path)
 logger = logging.getLogger('worker')
 
 
-
-
-
-
 class Add_User_Form(QDialog,add_Ui_Form):
-    def __init__(self,db, parent=None):
+    def __init__(self,db, parent=None,id=None,username=None,password=None,role=None):
         super(Add_User_Form, self).__init__(parent)
         self.setupUi(self)
         self.db = db
         self.query = QSqlQuery(self.db)
-        self.btn_add_ok.clicked.connect(self.add_user)
+        # todo : 当出现编辑的情况下，id、user_data没有传递过去，导致 无法更新对应的条目，反而变成添加条目了。
+        self.btn_add_ok.clicked.connect(self.insert_or_update_user)
         self.btn_add_cancle.clicked.connect(self.cancle_user)
+    # 在编辑的时候，显示各个内容值
+    def show_user_data_edit(self, user_data):
+        logger.info('set data')
+        logger.info(user_data)
+        id = str(user_data.value('id'))
+        logger.info(id)
+        self.input_username.setText(user_data.value('username'))
+        logger.info('set data')
+        self.input_password.setText(user_data.value('password'))
+        self.input_password2.setText(user_data.value('password'))
+        logger.info('set data')
+        logger.info(user_data.value('role') )
+        if user_data.value('role') == 'visitor':
+            self.radio_visitor.setChecked(True)
+        else:
+            self.radio_manager.setChecked(True)
+        self.insert_or_update_user(user_data)
 
 
-    def add_user(self):
+    def insert_or_update_user(self,user_data=None):
         logging.info(self.input_password.text())
         if not self.input_username.text() or not self.input_password.text():
             QMessageBox.warning(self,'输入不全','用户名、密码不能为空')
         if self.input_password.text() != self.input_password2.text() :
             QMessageBox.warning(self, '确认密码有问题', '密码、确认密码必须相同')
         logging.info('self.input_password.text()')
-
+        logger.info(user_data)
+        # logger.info(user_data.value('id'))
         if self.check_password() :
-            if self.radio_visitor.isChecked():
-                role = 'visitor'
-                logging.info(role)
-                self.inser_user2db(role)
-                logging.info(role)
+            if user_data and user_data.value('id'):
+                logger.info('in if ---------')
+                # 如果是已经存在数据库，则更新信息
+                id = user_data.value('id')
+                if self.radio_visitor.isChecked():
+                    role = 'visitor'
+                    logging.info(role)
+                    self.update_user2db(id, role)
+                    logging.info(role)
+                else:
+                    role = 'manager'
+                    self.update_user2db(id, role)
+            # 否则新增用户信息
             else:
-                role = 'manager'
-                logging.info(role)
-                self.inser_user2db(role)
-        # QMessageBox.information(self,'完成')
+                logger.info('in else ---------')
+                if self.radio_visitor.isChecked():
+                    role = 'visitor'
+                    logging.info(role)
+                    self.inser_user2db(role)
+                    logging.info(role)
+                if self.radio_manager.isChecked():
+                    role = 'manager'
+                    logging.info(role)
+                    self.inser_user2db(role)
+
+
+
         self.close()
+    def update_user2db(self,id,role):
+        logger.info('set data')
+        command = "update users set username='%s', password='%s', role='%s'  where id='%s' " % (self.input_username.text(), self.input_password.text(),role,id)
+        logging.info(command)
+        ok = self.query.exec(command)
+        if not ok :
+            logging.info(self.query.lastError().text())
 
     def inser_user2db(self,role):
         # connect = sqlite3.connect('mydata.db')
         logging.info(role)
-
-        # self.query.exec('command')
-        # c = connect.cursor()
-        # command = "insert into users(username,password,role) values(null,'%s','%s','%s')" % (self.input_username.text(), self.input_password.text(),role)
         command = "insert into users(username,password,role) values('%s','%s','%s')" % (self.input_username.text(), self.input_password.text(),role)
         logging.info(command)
         ok = self.query.exec(command)
@@ -73,7 +108,6 @@ class Add_User_Form(QDialog,add_Ui_Form):
             logging.info(self.query.lastError().text())
         # connect.commit()
         # connect.close()
-
 
     def check_password(self):
         password = self.input_password.text()
@@ -84,7 +118,6 @@ class Add_User_Form(QDialog,add_Ui_Form):
         else:
             # QMessageBox.information(self, '密码确认成功', '密码符合要求')
             return True
-
 
     def cancle_user(self):
         print('cancle add ')
@@ -106,7 +139,16 @@ class Manager(QDialog,manager_Ui_form):
         # self.btnCall.clicked.connect(self.open_diallog)
         # 查询模型
         # self.queryModel = None
+        # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
+        # self.queryModel = QSqlTableModel(self)
+        # self.queryModel.setTable('users')
+        # self.queryModel.setEditStrategy(QSqlTableModel.OnManualSubmit)  # 数据保存方式，OnManualSubmit , OnRowChange
+        # self.dataModel = QSqlQueryModel(self)
+        # 设置表头排序功能及表头样式
+        self.tableView.setSortingEnabled(True)
+        # self.tableView.horizontalHeader().setStyleSheet(
+        # "::section{background-color: pink; color: blue; font-weight: bold}")
         # 当前页
         self.currentPage = 0
         # 总页数
@@ -114,7 +156,7 @@ class Manager(QDialog,manager_Ui_form):
         # 总记录数
         self.totalRecrodCount = 0
         # 每页显示记录数
-        self.PageRecordCount = 10
+        self.PageRecordCount = 4
         self.db = db
         self.initUI()
 
@@ -122,6 +164,9 @@ class Manager(QDialog,manager_Ui_form):
         self.btn_add_user.clicked.connect(self.show_add_user)
         self.btn_modify_user.clicked.connect(self.show_modify_user)
         self.btn_delete_user.clicked.connect(self.show_delete_user)
+
+
+
 
     # 数据库相关
     def initUI(self):
@@ -145,17 +190,18 @@ class Manager(QDialog,manager_Ui_form):
     def setTableView(self):
         logger.info('*** step2 SetTableView')
 
-        # 声明查询模型
-        self.queryModel = QSqlQueryModel(self)
-        # self.dataModel = QSqlQueryModel(self)
+
         self.ceate_table()
+        # 设置模型
+        self.tableView.setModel(self.queryModel)
+        # self.queryModel.select()
         # 设置当前页
         self.currentPage = 1
         # 得到总记录数
         self.totalRecrodCount = self.getTotalRecordCount()
         # 得到总页数
         self.totalPage = self.getPageCount()
-        # logger.info('----total page:')
+        logger.info('----total page:')
 
         # 刷新状态
         # self.updateStatus()
@@ -169,7 +215,7 @@ class Manager(QDialog,manager_Ui_form):
         self.tableView.setModel(self.queryModel)
 
         # logger.info('totalRecrodCount=' + str(self.totalRecrodCount))
-        # logger.info('totalPage=' + str(self.totalPage))
+        logger.info('totalPage=' + str(self.totalPage))
         self.updateStatus()
 
         # 设置表格表头
@@ -177,7 +223,8 @@ class Manager(QDialog,manager_Ui_form):
         self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "姓名")
         self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "密码")
         self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "角色")
-
+    # 隐藏密码
+    #     self.tableView.setColumnHidden({2})
     # 先判断表格是否存在，否则创建表格
     def ceate_table(self):
         self.query = QSqlQuery()
@@ -191,13 +238,17 @@ class Manager(QDialog,manager_Ui_form):
                         "username vchar, "
                         "password vchar, "
                         "role vchar)")
+        logger.info(' fisish create db ')
+
 
     # 得到记录数
     def getTotalRecordCount(self):
+        logger.info('total1 ')
         self.queryModel.setQuery("select * from users")
+        logger.info('total2 ')
 
         rowCount = self.queryModel.rowCount()
-        # logger.info('rowCount==' + str(rowCount))
+        logger.info('rowCount==' + str(rowCount))
         return rowCount
 
     # 得到页数
@@ -305,10 +356,51 @@ class Manager(QDialog,manager_Ui_form):
 
 
     def show_modify_user(self):
-        pass
+        # row = self.tableView.selectedIndexes()
+        # name = self.tableView.currentIndex()
+        idx=self.tableView.selectionModel().currentIndex().row()
+
+        logger.info(idx)
+        id = self.queryModel.index(idx,0).data()
+        logger.info(id)
+        if idx >= 0:
+            self.query.prepare('SELECT * FROM users WHERE id = :id')
+            logger.info('prepare')
+            self.query.bindValue(':id', self.queryModel.index(idx, 0).data())
+            logger.info("bindvalue")
+            self.query.exec()
+            if self.query.next():
+                editor = Add_User_Form(self.db)
+                logger.info('editor')
+                logger.info(self.query.record())
+                editor.show_user_data_edit(self.query.record())
+                logger.info('set user data')
+                result = editor.exec()
+
+        # self.tableView.setItem(0,0,'aaaa')
 
     def show_delete_user(self):
-        pass
+        idx=self.tableView.selectionModel().currentIndex().row()
+        id = self.queryModel.index(idx,0).data()
+        logger.info(id)
+        if idx >= 0:
+            # query = QSqlQuery(self.db)
+            # logger.info(query)
+
+            confirm_delete = QMessageBox.question(self, 'Delete User', 'Are you sure you want to delete this user?',
+                                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            logger.info(confirm_delete)
+
+            if confirm_delete == QMessageBox.StandardButton.Yes:
+                # query = QSqlQuery(self.db)
+                self.query.prepare(f'DELETE FROM users WHERE id ={id}')
+                logger.info(idx)
+                # query.bindValue(':id', id)
+                logger.info(self.query.lastQuery() )
+                self.query.exec()
+                # if self.query.exec():
+                #     self.queryModel.setQuery('SELECT * FROM users')
+
     def create_tb(self):
         create_tb_shell = ' create table if not exists  users(id integer primary key AUTOINCREMENT ,  "username" vchar,"password" vchar,"role" vchar);'
         logging.info('berore before')

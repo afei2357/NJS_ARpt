@@ -1,15 +1,18 @@
+#todo
+# ☐ 泌尿系结石-登录界面优化/账号体系/规划功能模块
 import sys,os
-import time
+
 if not os.path.exists('./logs/'):
     os.makedirs('./logs/')
 
-from Ui_MainWindow import Ui_MainWindow
+from UI.Ui_MainWindow import Ui_MainWindow
 
 from PyQt6.QtWidgets import *
 from PyQt6.QtSql import QSqlDatabase
 from DataViewCelled import DataViewCelled
 import logging.config
-from worker import WorkerThread
+from utils.worker import WorkerThread
+from user.user_manager import Manager
 
 config_path = './config/logging.ini'
 logging.config.fileConfig(config_path)
@@ -69,9 +72,12 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         else:
             self.btnGenerateReport.setEnabled(False)
         # btnTestReport 按钮仅用于方便测试，软件发布之后将其设置为不可见。
-        self.btnTestReport.setVisible(False)
+        #todo
+        # self.btnTestReport.setVisible(False)
+        self.btnTestReport.setVisible(True)
         self.btnTestReport.clicked.connect(self.test_generate_report_table)
         self.btnShowPatientInfo.clicked.connect(self.show_patient_info)
+    # 显示病人数据库信息
     def show_patient_info(self):
         self.table_dialog.exec()
     # 获取保存结果文件的目录路径
@@ -120,10 +126,14 @@ class ARptWindow( QMainWindow,Ui_MainWindow):
         self.lbl_report_status.setText("<font color=red size=2><b>报告正在生成，请稍后...</b></font>")
     # 如下函数仅用于方便测试
     def test_generate_report_table(self):
-        self.info_file = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/表A.xlsx'
-        self.value_file = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/尿结石表B：数据集.xlsx'
+        self.info_file = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/表A3.xlsx'
+        self.value_file = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/input/尿结石表B：数据集3.xlsx'
         self.reports_result = 'D:/project/PycharmProjects/pyqt5/NJS_ARpt_project/reports_result'
-        self.generate_report()
+        # todo
+        # self.generate_report()
+        print('before manager ')
+        manager = Manager(self.db)
+        manager.exec()
 
     # 全部状态完成后提示
     def finished_state(self):

@@ -8,17 +8,18 @@ from PyQt6.QtWidgets import QFileDialog
 import logging.config
 import sqlite3
 import pandas as pd
-
+# todo
+# 不使用此代码
 logging.config.fileConfig('./config/logging.ini')
 logger = logging.getLogger('worker')
 
 # 配置显示数据接口界面的
-class DataViewCelled( QDialog,Ui_widget):
-    def __init__(self, db,parent=None):
-        super(DataViewCelled, self).__init__(parent)
+class DataQueryModel( QDialog,):
+    def __init__(self, db,tableView,parent=None):
+        # super(DataViewCelled, self).__init__(parent)
         self.setupUi(self)
         logger.info('start DataViewCelled')
-
+        self.tableView = tableView
         # self.btnCall.clicked.connect(self.open_diallog)
         # 查询模型
         self.queryModel = None
@@ -55,6 +56,7 @@ class DataViewCelled( QDialog,Ui_widget):
 
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
+        # self.dataModel = QSqlQueryModel(self)
         self.ceate_table()
         # 设置当前页
         self.currentPage = 1

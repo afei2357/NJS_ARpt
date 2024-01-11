@@ -1,8 +1,8 @@
-from Ui_MainWindow import Ui_MainWindow
+from NJS_ARpt_project.UI.Ui_MainWindow import Ui_MainWindow
 from PyQt6.QtWidgets import *
 import sys
 import re
-from PyQt6.QtWidgets import (QWidget , QHBoxLayout , QVBoxLayout , QApplication, QPushButton, QLineEdit ,QLabel , QSplitter ,  QTableView , QHeaderView , QMessageBox )
+from PyQt6.QtWidgets import (QApplication, QHeaderView , QMessageBox)
 from PyQt6.QtCore import Qt
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
 
@@ -86,7 +86,6 @@ class DBdataView(QMainWindow,Ui_MainWindow):
         self.db.setDatabaseName('./db/database.db')
         # 打开数据库
         self.db.open()
-
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
         self.reset_table_view()

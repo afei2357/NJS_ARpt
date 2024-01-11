@@ -1,12 +1,12 @@
-from Ui_MainWindow import Ui_MainWindow
 from PyQt6.QtWidgets import *
-import sys
 import re
-from PyQt6.QtWidgets import (QWidget , QHBoxLayout , QVBoxLayout , QApplication, QPushButton, QLineEdit ,QLabel , QSplitter ,  QTableView , QHeaderView , QMessageBox )
+from PyQt6.QtWidgets import (QTableView , QHeaderView , QMessageBox)
 from PyQt6.QtCore import Qt
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
-import Ui_DataView
-class testDialog( QDialog,Ui_DataView):
+from NJS_ARpt_project.UI import Ui_DataView
+
+
+class testDialog(QDialog, Ui_DataView):
     def __init__(self):
         super().__init__(parent=None)
         self.setWindowsTitle('显示数据库')
@@ -14,7 +14,7 @@ class testDialog( QDialog,Ui_DataView):
 
 
 
-class DatabaseDialog( QDialog,Ui_DataView):
+class DatabaseDialog(QDialog, Ui_DataView):
 # class ARptWindow(QMainWindow,DBdataView):
     def __init__(self, parent=None):
         super(DatabaseDialog, self).__init__(parent)

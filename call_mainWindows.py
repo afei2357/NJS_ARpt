@@ -1,15 +1,11 @@
 import sys,os
-import time
 
 # from PyQt5.QtWidgets import QApplication, QMainWindow
-from Ui_MainWindow import Ui_MainWindow
 # from PyQt6.QtCore import *
 # # from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from worker import WorkerThread
+from NJS_ARpt_project.utils.worker import WorkerThread
 from DBdataView import DBdataView
-
-from time import sleep
 
 
 # class ARptWindow(QMainWindow, Ui_MainWindow,DBdataView):

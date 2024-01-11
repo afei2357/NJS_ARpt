@@ -1,7 +1,7 @@
 from PyQt6.QtCore import QThread
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtSql import QSqlDatabase, QSqlQueryModel, QSqlQuery
-from reporter import *
+# from reporter import *
 import time, json
 import pandas
 

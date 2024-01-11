@@ -1,27 +1,112 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery
 import re
-from PyQt6.QtWidgets import QDialog,QHeaderView,QMessageBox
-from UI.Ui_be_called import Ui_widget
-from PyQt6.QtWidgets import QFileDialog
-# import logging
-import logging.config
-import sqlite3
-import pandas as pd
+import sys,os
+from PyQt6.QtWidgets import *
 
-logging.config.fileConfig('./config/logging.ini')
+
+from PyQt6.QtWidgets import QDialog,QHeaderView,QMessageBox
+# from UI.UI_acount_manager import Ui_Form
+from UI.UI_acount_manager import Ui_Form as manager_Ui_form
+from UI.Ui_create_acount import Ui_Form as add_Ui_Form
+
+from PyQt6.QtWidgets import QFileDialog
+
+
+import logging.config
+import logging
+# basedir = os.path.join( os.path.abspath(__file__) ,os.pardir,os.pardir)
+# print(basedir)
+# config_file = os.path.join(basedir,'config/logging.ini')
+# logging.config.fileConfig(config_file)
+config_path = './config/logging.ini'
+logging.config.fileConfig(config_path)
 logger = logging.getLogger('worker')
 
-# 配置显示数据接口界面的
-class DataViewCelled( QDialog,Ui_widget):
-    def __init__(self, db,parent=None):
-        super(DataViewCelled, self).__init__(parent)
+
+
+
+
+
+class Add_User_Form(QDialog,add_Ui_Form):
+    def __init__(self,db, parent=None):
+        super(Add_User_Form, self).__init__(parent)
         self.setupUi(self)
-        logger.info('start DataViewCelled')
+        self.db = db
+        self.query = QSqlQuery(self.db)
+        self.btn_add_ok.clicked.connect(self.add_user)
+        self.btn_add_cancle.clicked.connect(self.cancle_user)
+
+
+    def add_user(self):
+        logging.info(self.input_password.text())
+        if not self.input_username.text() or not self.input_password.text():
+            QMessageBox.warning(self,'输入不全','用户名、密码不能为空')
+        if self.input_password.text() != self.input_password2.text() :
+            QMessageBox.warning(self, '确认密码有问题', '密码、确认密码必须相同')
+        logging.info('self.input_password.text()')
+
+        if self.check_password() :
+            if self.radio_visitor.isChecked():
+                role = 'visitor'
+                logging.info(role)
+                self.inser_user2db(role)
+                logging.info(role)
+            else:
+                role = 'manager'
+                logging.info(role)
+                self.inser_user2db(role)
+        # QMessageBox.information(self,'完成')
+        self.close()
+
+    def inser_user2db(self,role):
+        # connect = sqlite3.connect('mydata.db')
+        logging.info(role)
+
+        # self.query.exec('command')
+        # c = connect.cursor()
+        # command = "insert into users(username,password,role) values(null,'%s','%s','%s')" % (self.input_username.text(), self.input_password.text(),role)
+        command = "insert into users(username,password,role) values('%s','%s','%s')" % (self.input_username.text(), self.input_password.text(),role)
+        logging.info(command)
+        ok = self.query.exec(command)
+        if not ok :
+            logging.info(self.query.lastError().text())
+        # connect.commit()
+        # connect.close()
+
+
+    def check_password(self):
+        password = self.input_password.text()
+        # 检查密码长度和包含数字和字母
+        if len(password) < 6 or not (any(char.isdigit() for char in password) and any(char.isalpha() for char in password)):
+            QMessageBox.warning(self, '确认密码有问题', '密码不小于6位数，且必须包含数字和字母')
+            return False
+        else:
+            # QMessageBox.information(self, '密码确认成功', '密码符合要求')
+            return True
+
+
+    def cancle_user(self):
+        print('cancle add ')
+        self.close()
+
+class Manager(QDialog,manager_Ui_form):
+    def __init__(self,db, parent=None):
+        super(Manager, self).__init__(parent)
+        self.setupUi(self)
+        logging.info('creat before')
+        # logger.info('start Manager')
+        # print('aaaaaa')
+        self.db = db
+        self.query = QSqlQuery(self.db)
+        self.create_tb()
+
+        logging.info('start DataViewCelled')
 
         # self.btnCall.clicked.connect(self.open_diallog)
         # 查询模型
-        self.queryModel = None
+        # self.queryModel = None
+        self.queryModel = QSqlQueryModel(self)
         # 当前页
         self.currentPage = 0
         # 总页数
@@ -33,6 +118,11 @@ class DataViewCelled( QDialog,Ui_widget):
         self.db = db
         self.initUI()
 
+
+        self.btn_add_user.clicked.connect(self.show_add_user)
+        self.btn_modify_user.clicked.connect(self.show_modify_user)
+        self.btn_delete_user.clicked.connect(self.show_delete_user)
+
     # 数据库相关
     def initUI(self):
         # 创建窗口
@@ -43,18 +133,21 @@ class DataViewCelled( QDialog,Ui_widget):
         self.prevButton.clicked.connect(self.onPrevButtonClick)
         self.nextButton.clicked.connect(self.onNextButtonClick)
         self.switchPageButton.clicked.connect(self.onSwitchPageButtonClick)
-        self.btnExportInfo.clicked.connect(self.exportInfo)
+        # self.btnExportInfo.clicked.connect(self.exportInfo)
 
         # 设置表格属性
         # 表格宽度的自适应调整
         self.tableView.horizontalHeader().setStretchLastSection(True)
         self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
+
+
     def setTableView(self):
         logger.info('*** step2 SetTableView')
 
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
+        # self.dataModel = QSqlQueryModel(self)
         self.ceate_table()
         # 设置当前页
         self.currentPage = 1
@@ -81,13 +174,10 @@ class DataViewCelled( QDialog,Ui_widget):
 
         # 设置表格表头
         self.queryModel.setHeaderData(0, Qt.Orientation.Horizontal, "id")
-        self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "编号")
-        self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "姓名")
-        self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "性别")
-        self.queryModel.setHeaderData(4, Qt.Orientation.Horizontal, "年龄")
-        self.queryModel.setHeaderData(5, Qt.Orientation.Horizontal, "采样日期")
-        self.queryModel.setHeaderData(6, Qt.Orientation.Horizontal, "风险区间")
-        self.queryModel.setHeaderData(7, Qt.Orientation.Horizontal, "风险值")
+        self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "姓名")
+        self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "密码")
+        self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "角色")
+
     # 先判断表格是否存在，否则创建表格
     def ceate_table(self):
         self.query = QSqlQuery()
@@ -96,19 +186,15 @@ class DataViewCelled( QDialog,Ui_widget):
         # self.query.exec("create table if not exists  patient_results (id integer primary key AUTOINCREMENT ,"
         #                 "sample_code vchar,"
         #                 "results vchar)")
-        # patient_info 用于保存输入结果信息和展示给用户看
-        self.query.exec("create table if not exists  patient_info(id integer primary key AUTOINCREMENT ,"
-                        " sample_code vchar,"
-                        "name vchar, "
-                        "gender_desc vchar, "
-                        "birthday vchar, "
-                        "sampling_time vchar,"
-                        "risk vchar,"
-                        "predict_pls vchar)")
+        # users 用于保存输入结果信息和展示给用户看
+        self.query.exec("create table if not exists  users(id integer primary key AUTOINCREMENT ,"
+                        "username vchar, "
+                        "password vchar, "
+                        "role vchar)")
 
     # 得到记录数
     def getTotalRecordCount(self):
-        self.queryModel.setQuery("select * from patient_info")
+        self.queryModel.setQuery("select * from users")
 
         rowCount = self.queryModel.rowCount()
         # logger.info('rowCount==' + str(rowCount))
@@ -126,7 +212,7 @@ class DataViewCelled( QDialog,Ui_widget):
 
     # 记录查询
     def recordQuery(self, limitIndex):
-        szQuery = ("select * from patient_info limit %d,%d" % (limitIndex, self.PageRecordCount))
+        szQuery = ("select * from users limit %d,%d" % (limitIndex, self.PageRecordCount))
         # logger.info('query sql=' + szQuery)
         self.queryModel.setQuery(szQuery)
 
@@ -209,15 +295,28 @@ class DataViewCelled( QDialog,Ui_widget):
         self.currentPage = pageIndex
         # 刷新状态
         self.updateStatus();
-    #导出所有
-    def exportInfo(self):
-        export_full_path,_ = QFileDialog.getSaveFileName(self,'保存为',".","Excel(*.xlsx)")
-        if not  export_full_path:
-            QMessageBox.warning(self,'路径出错','请选择导出路径')
-            return
-        with sqlite3.connect('./db/database.db') as con:
-            c = con.cursor()
-            df = pd.read_sql('select * from patient_info', con=con)
-            logger.info(export_full_path)
-            df.to_excel(export_full_path, index=False)
-        QMessageBox.information(self,'导出结果','导出成功')
+
+
+
+    def show_add_user(self):
+        form_add = Add_User_Form(self.db)
+        form_add.exec()
+        logging.info('exec before')
+
+
+    def show_modify_user(self):
+        pass
+
+    def show_delete_user(self):
+        pass
+    def create_tb(self):
+        create_tb_shell = ' create table if not exists  users(id integer primary key AUTOINCREMENT ,  "username" vchar,"password" vchar,"role" vchar);'
+        logging.info('berore before')
+        self.query.exec(create_tb_shell)
+        logging.info('create')
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    myWin = Manager()
+    myWin.show()
+    sys.exit(app.exec())

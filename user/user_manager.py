@@ -66,17 +66,7 @@ class AddDialog(QDialog,add_Ui_Form):
                 self.data = None  # 重置data
                 return
             logger.info('append ')
-            id = self.data['id']
-            username = self.input_username.text()
-            password = self.input_password.text()
-            if  self.radio_manager.isChecked() :
-                role = 'manager'
-            if self.radio_visitor.isChecked() :
-                role = 'visitor'
-
-            # role = self.radio_visitor.text()
-            row = self.data['row']
-            self.data = {"username":username,'password':password,"id":id,'role':role,'row':row}
+            self.set_data()
             if not self.data:
                 return
         logger.info(self.data)
@@ -84,7 +74,26 @@ class AddDialog(QDialog,add_Ui_Form):
         super().accept()
         return self.data
 
- 
+    def set_data(self):
+        logger.info('setdata')
+        username = self.input_username.text()
+        password = self.input_password.text()
+        if self.radio_manager.isChecked():
+            role = 'manager'
+        if self.radio_visitor.isChecked():
+            role = 'visitor'
+        if isinstance(self.data,dict):
+            data = self.data.copy()
+        else:
+            data = {}
+        # self.data = {"username": username, 'password': password,   'role': role}
+        data['username'] = username
+        data['password'] = password
+        data['role'] = role
+        self.data = data
+
+
+
     def cancle_user(self):
         logger.info('cancle')
         super().reject()
@@ -111,15 +120,15 @@ class AddDialog(QDialog,add_Ui_Form):
                 self.data = None # 重置data
                 return
             logger.info('append ')
-            self.data.append(field.text())
-
-            if not self.data:
-                return
+            # self.data.append(field.text())
+        self.set_data()
+        logger.info('append set_data ')
+        if not self.data:
+            return
         logger.info('super accept  ')
+        logger.info(self.data )
         super().accept()
         return self.data
-
-
 
 
     # 在编辑的时候，显示各个内容值
@@ -239,37 +248,14 @@ class Manager(QDialog,manager_Ui_form):
         logger.info('will edit ')
         row =self.tableView.selectionModel().currentIndex().row()
         id = self.user_model.queryModel.index(row,0).data()
-        logger.info(id)
-
-        # record =self.tableView.selectionModel().currentIndex().row()
-        record = self.user_model.queryModel.record(row)
-
-        logger.info(id)
-        logger.info(record)
-
-        username = record.value('username')
-        password = record.value('password')
-        role = record.value('role')
-        logger.info(username)
-        data = {"username":username,'password':password,'role':role,"id":id,'row':row }
-
+        data = self.user_model.get_data(row)
         add_dialog = AddDialog(self,data=data)
-        logger.info('will add 2')
         result = add_dialog.exec()
         logger.info(result)
         logger.info(add_dialog.data)
         if result :
-            logger.info('will add 3')
-            data = add_dialog.data
             self.user_model.edit_user(add_dialog.data)
-
-
-            # logger.info('will add 7')
-            #
-            # self.user_model.queryModel.submitAll()
-            # self.user_model.queryModel.select()
             self.tableView.resizeColumnsToContents()
-            logger.info(data)
 
     # ok
     def onDelete(self):

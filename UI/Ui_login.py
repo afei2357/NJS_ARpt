@@ -48,7 +48,7 @@ class Ui_Form(object):
         self.horizontalLayout_2.addWidget(self.btnCancle)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.horizontalLayoutWidget_3 = QtWidgets.QWidget(Form)
-        self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(160, 60, 310, 71))
+        self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(160, 60, 450, 71))
         self.horizontalLayoutWidget_3.setObjectName("horizontalLayoutWidget_3")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_3)
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -67,9 +67,9 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "泌尿结石风险预测"))
+        Form.setWindowTitle(_translate("Form", "泌尿系结石代谢评估及风险预测软件"))
         self.label.setText(_translate("Form", "用户名"))
         self.label_2.setText(_translate("Form", "密码"))
         self.btnLogin.setText(_translate("Form", "登录"))
         self.btnCancle.setText(_translate("Form", "取消"))
-        self.label_3.setText(_translate("Form", "泌尿系结石风险预测软件"))
+        self.label_3.setText(_translate("Form", "泌尿系结石代谢评估及风险预测软件"))

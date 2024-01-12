@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>泌尿结石风险预测</string>
+   <string>泌尿系结石代谢评估及风险预测软件</string>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
@@ -79,7 +79,7 @@
     <rect>
      <x>160</x>
      <y>60</y>
-     <width>310</width>
+     <width>450</width>
      <height>71</height>
     </rect>
    </property>
@@ -94,7 +94,7 @@
        </font>
       </property>
       <property name="text">
-       <string>泌尿系结石风险预测软件</string>
+       <string>泌尿系结石代谢评估及风险预测软件</string>
       </property>
      </widget>
     </item>

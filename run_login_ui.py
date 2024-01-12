@@ -1,4 +1,5 @@
 import os,sys
+from PyQt6 import QtCore, QtGui, QtWidgets
 if not os.path.exists('./logs/'):
     os.makedirs('./logs/')
 
@@ -92,7 +93,12 @@ if __name__ == '__main__':
     login_window = Login(stacked_widget)
     main_window = ARptWindow()
     stacked_widget.addWidget(login_window)
+    stacked_widget.setWindowTitle( "泌尿系结石代谢评估及风险预测软件")
     stacked_widget.addWidget(main_window)
+    # stacked_widget.setWindowTitle(0, "泌尿结石登录页面2")
+    icon = QtGui.QIcon()
+    icon.addPixmap(QtGui.QPixmap("images/logo.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+    stacked_widget.setWindowIcon(icon)
 
     stacked_widget.show()
 

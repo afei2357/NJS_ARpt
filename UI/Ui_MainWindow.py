@@ -16,7 +16,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QtCore.QSize(600, 437))
         MainWindow.setMaximumSize(QtCore.QSize(800, 16777215))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("../images/logo.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("images/logo.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -71,7 +71,7 @@ class Ui_MainWindow(object):
         self.btnTestReport.setGeometry(QtCore.QRect(110, 310, 93, 28))
         self.btnTestReport.setObjectName("btnTestReport")
         self.lbl_finish = QtWidgets.QLabel(self.centralwidget)
-        self.lbl_finish.setGeometry(QtCore.QRect(200, 320, 401, 41))
+        self.lbl_finish.setGeometry(QtCore.QRect(110, 350, 401, 41))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.lbl_finish.setFont(font)
@@ -92,7 +92,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "尿结石报告软件"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "泌尿系结石代谢评估及风险预测软件"))
         self.label_2.setText(_translate("MainWindow", "所输入信息表："))
         self.label_3.setText(_translate("MainWindow", "所输入检测表："))
         self.btnOpenInfo.setText(_translate("MainWindow", "信息表(A表)"))
@@ -104,5 +104,5 @@ class Ui_MainWindow(object):
         self.btnReport.setText(_translate("MainWindow", "打开报告结果目录"))
         self.btnShowPatientInfo.setText(_translate("MainWindow", "打开数据库"))
         self.lbl_report_status.setText(_translate("MainWindow", "报告正在生成，请稍后..."))
-        self.btnTestReport.setText(_translate("MainWindow", "测试报告"))
+        self.btnTestReport.setText(_translate("MainWindow", "账号管理"))
         self.lbl_finish.setText(_translate("MainWindow", "等待输入"))

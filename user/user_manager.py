@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QDialog,QHeaderView,QMessageBox
 # from UI.UI_acount_manager import Ui_Form
 from UI.UI_acount_manager import Ui_Form as manager_Ui_form
 from UI.Ui_create_acount import Ui_Form as add_Ui_Form
-
+from user.user_model import User
 from PyQt6.QtWidgets import QFileDialog
 
 
@@ -23,14 +23,104 @@ logger = logging.getLogger('worker')
 
 class AddDialog(QDialog,add_Ui_Form):
     # self.queryModel, selected_row
-    def __init__(self,model, row=-1,parent=None):
+    def __init__(self,parent=None,data=None):
         super(AddDialog, self).__init__(parent)
         self.setupUi(self)
-        self.model = model
-        self.row = row
+        self.data = data
+        logger.info('init ')
+        if self.data:
+            logger.info('set data ')
+            self.input_username.setText(str(self.data['username']))
+            self.input_password.setText(str(self.data['password']))
+            self.input_password2.setText(str(self.data['password']))
+            if self.data['password'] == 'manager':
+                self.radio_manager.setChecked(True)
+            else:
+                self.radio_visitor.setChecked(True)
+            self.btn_add_ok.clicked.connect(self.update_user)
+
+
         # todo : 当出现编辑的情况下，id、user_data没有传递过去，导致 无法更新对应的条目，反而变成添加条目了。
-        self.btn_add_ok.clicked.connect(self.insert_or_update_user)
+        if not self.data:
+            self.btn_add_ok.clicked.connect(self.insert_user)
         self.btn_add_cancle.clicked.connect(self.cancle_user)
+
+    def update_user(self):
+        logger.info('in access')
+        if self.input_password.text() != self.input_password2.text():
+            logger.info('in if 1')
+
+            QMessageBox.critical(self,
+                                 "错误",
+                                 f"两个密码必须相同！")
+            self.data = None  # 重置data
+            return
+
+        for field in (self.input_username, self.input_password, self.input_password2):
+            logger.info('in for')
+            if not field.text():
+                logger.info('in if2')
+                QMessageBox.critical(self,
+                                     "错误",
+                                     f"内容不能为空：{field.objectName()}")
+                self.data = None  # 重置data
+                return
+            logger.info('append ')
+            id = self.data['id']
+            username = self.input_username.text()
+            password = self.input_password.text()
+            if  self.radio_manager.isChecked() :
+                role = 'manager'
+            if self.radio_visitor.isChecked() :
+                role = 'visitor'
+
+            # role = self.radio_visitor.text()
+            row = self.data['row']
+            self.data = {"username":username,'password':password,"id":id,'role':role,'row':row}
+            if not self.data:
+                return
+        logger.info(self.data)
+        logger.info('super accept  ')
+        super().accept()
+        return self.data
+
+ 
+    def cancle_user(self):
+        logger.info('cancle')
+        super().reject()
+        return None
+    def insert_user(self):
+        logger.info('in access')
+        self.data = []
+        if self.input_password.text() != self.input_password2.text():
+            logger.info('in if 1')
+
+            QMessageBox.critical(self,
+                                 "错误",
+                                 f"两个密码必须相同！")
+            self.data = None  # 重置data
+            return
+
+        for field in (self.input_username,self.input_password,self.input_password2):
+            logger.info('in for')
+            if not field.text():
+                logger.info('in if2')
+                QMessageBox.critical(self,
+                                     "错误",
+                                     f"内容不能为空：{field.objectName()}")
+                self.data = None # 重置data
+                return
+            logger.info('append ')
+            self.data.append(field.text())
+
+            if not self.data:
+                return
+        logger.info('super accept  ')
+        super().accept()
+        return self.data
+
+
+
 
     # 在编辑的时候，显示各个内容值
     def show_user_data_edit(self, user_data):
@@ -94,32 +184,13 @@ class Manager(QDialog,manager_Ui_form):
         self.db = db
         self.query = QSqlQuery(self.db)
         self.create_tb()
+        # 设置模型
+        logger.info('self.user_model')
+        self.user_model = User(self.db)
+        # 设置模型
+        self.tableView.setModel(self.user_model.queryModel)
+        logger.info('view')
 
-        logging.info('start DataViewCelled')
-
-        # self.btnCall.clicked.connect(self.open_diallog)
-        # 查询模型
-        # self.queryModel = None
-        # 声明查询模型
-        # self.queryModel = QSqlQueryModel(self)
-        self.queryModel = QSqlTableModel(self)
-        self.queryModel.setTable('users')
-        self.queryModel.select()
-        # self.queryModel.setEditStrategy(QSqlTableModel.OnManualSubmit)  # 数据保存方式，OnManualSubmit , OnRowChange
-        # self.dataModel = QSqlQueryModel(self)
-        # 设置表头排序功能及表头样式
-        self.tableView.setSortingEnabled(True)
-        # self.tableView.horizontalHeader().setStyleSheet(
-        # "::section{background-color: pink; color: blue; font-weight: bold}")
-        # 当前页
-        self.currentPage = 0
-        # 总页数
-        self.totalPage = 0
-        # 总记录数
-        self.totalRecrodCount = 0
-        # 每页显示记录数
-        self.PageRecordCount = 4
-        self.db = db
         self.initUI()
 
         #
@@ -128,7 +199,7 @@ class Manager(QDialog,manager_Ui_form):
         # self.btn_delete_user.clicked.connect(self.show_delete_user)
 
         self.btn_add_user.clicked.connect(self.onAdd)
-        # # self.btn_modify_user.clicked.connect(self.onEdit)
+        self.btn_modify_user.clicked.connect(self.onEdit)
         self.btn_delete_user.clicked.connect(self.onDelete)
 
     # 数据库相关
@@ -147,32 +218,58 @@ class Manager(QDialog,manager_Ui_form):
         # 表格宽度的自适应调整
         self.tableView.horizontalHeader().setStretchLastSection(True)
         self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+
+    # ok
     def onAdd(self,data):
-        rows = self.queryModel.rowCount()
-        self.queryModel.insertRows(rows, 1)
-        for column, field in enumerate(data):
-            self.queryModel.setData(self.queryModel.index(rows, column + 1), field)
-        self.queryModel.submitAll()
-        self.queryModel.select()
+        logger.info('will add ')
+        add_dialog = AddDialog(self)
+        logger.info('will add 2')
+        # if add_dialog.exec() == QDialog.accepted(self):
+        result = add_dialog.exec()
+        logger.info(result)
+        logger.info(add_dialog.data)
+        if result :
+            logger.info('will add 3')
+            self.user_model.add_user(add_dialog.data)
+            logger.info('will add 4')
+            self.tableView.resizeColumnsToContents()
 
-    def onAdd2(self):
-        selected_row = self.tableView.selectionModel().currentIndex().row()
 
-        if selected_row >= 0:
-            editor = AddDialog(self.queryModel, selected_row)
-            result = editor.exec()
-            print(result)
-            if result:
-                self.queryModel.select()
-    def onAdd1(self):
-        self.tableView.scrollToBottom()
-        rowCount = self.queryModel.rowCount()
-        self.queryModel.insertRow(rowCount)
+    def onEdit(self):
+        logger.info('will edit ')
+        row =self.tableView.selectionModel().currentIndex().row()
+        id = self.user_model.queryModel.index(row,0).data()
+        logger.info(id)
 
-    # def onInsert(self):
-    #     index = self.tableView.currentIndex()
-    #     row = index.row()
-    #     self.queryModel.insertRow(row)
+        # record =self.tableView.selectionModel().currentIndex().row()
+        record = self.user_model.queryModel.record(row)
+
+        logger.info(id)
+        logger.info(record)
+
+        username = record.value('username')
+        password = record.value('password')
+        role = record.value('role')
+        logger.info(username)
+        data = {"username":username,'password':password,'role':role,"id":id,'row':row }
+
+        add_dialog = AddDialog(self,data=data)
+        logger.info('will add 2')
+        result = add_dialog.exec()
+        logger.info(result)
+        logger.info(add_dialog.data)
+        if result :
+            logger.info('will add 3')
+            data = add_dialog.data
+            self.user_model.edit_user(add_dialog.data)
+
+
+            # logger.info('will add 7')
+            #
+            # self.user_model.queryModel.submitAll()
+            # self.user_model.queryModel.select()
+            self.tableView.resizeColumnsToContents()
+            logger.info(data)
 
     # ok
     def onDelete(self):
@@ -183,17 +280,12 @@ class Manager(QDialog,manager_Ui_form):
                                               QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         logger.info(messageBox)
         if messageBox == QMessageBox.StandardButton.Yes:
-            self.queryModel.removeRow(row)
+            self.user_model.delete_user(row)
             # self.queryModel.submitAll()
-            self.queryModel.select()
+            # self.queryModel.select()
 
     def setTableView(self):
         logger.info('*** step2 SetTableView')
-
-
-        self.ceate_table()
-        # 设置模型
-        self.tableView.setModel(self.queryModel)
         # 表格宽度的自适应调整
         self.tableView.horizontalHeader().setStretchLastSection(True)
         self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -202,12 +294,24 @@ class Manager(QDialog,manager_Ui_form):
         self.currentPage = 1
         # 设置表格表头
         # self.queryModel.setHeaderData(0, Qt.Orientation.Horizontal, "id")
-        self.queryModel.setHeaderData(1, Qt.Orientation.Horizontal, "姓名")
-        self.queryModel.setHeaderData(3, Qt.Orientation.Horizontal, "角色")
-        self.queryModel.setHeaderData(2, Qt.Orientation.Horizontal, "密码")
         # 隐藏id
         self.tableView.setColumnHidden(0,True)
         # self.tableView.setColumnHidden(2,True)
+
+        # 设置表头排序功能及表头样式
+        self.tableView.setSortingEnabled(True)
+        # self.tableView.horizontalHeader().setStyleSheet(
+        # "::section{background-color: pink; color: blue; font-weight: bold}")
+        # 当前页
+        self.currentPage = 0
+        # 总页数
+        self.totalPage = 0
+        # 总记录数
+        self.totalRecrodCount = 0
+        # 每页显示记录数
+        self.PageRecordCount = 4
+
+
 # todo
     def test(self):
         # 得到总记录数
@@ -224,8 +328,7 @@ class Manager(QDialog,manager_Ui_form):
         self.setTotalRecordLabel()
         # 记录查询
         self.recordQuery(0)
-        # 设置模型
-        self.tableView.setModel(self.queryModel)
+
 
         # logger.info('totalRecrodCount=' + str(self.totalRecrodCount))
         logger.info('totalPage=' + str(self.totalPage))
@@ -357,24 +460,20 @@ class Manager(QDialog,manager_Ui_form):
 
 
 
-    def show_add_user(self):
-        form_add = AddDialog(self.db)
-        form_add.exec()
-        logging.info('exec before')
 
 
     def show_modify_user(self):
         # row = self.tableView.selectedIndexes()
         # name = self.tableView.currentIndex()
-        idx=self.tableView.selectionModel().currentIndex().row()
+        row =self.tableView.selectionModel().currentIndex().row()
 
-        logger.info(idx)
-        id = self.queryModel.index(idx,0).data()
+        logger.info(row)
+        id = self.queryModel.index(row,0).data()
         logger.info(id)
-        if idx >= 0:
+        if row >= 0:
             self.query.prepare('SELECT * FROM users WHERE id = :id')
             logger.info('prepare')
-            self.query.bindValue(':id', self.queryModel.index(idx, 0).data())
+            self.query.bindValue(':id', self.queryModel.index(row, 0).data())
             logger.info("bindvalue")
             self.query.exec()
             if self.query.next():
@@ -388,10 +487,10 @@ class Manager(QDialog,manager_Ui_form):
         # self.tableView.setItem(0,0,'aaaa')
 
     def show_delete_user(self):
-        idx=self.tableView.selectionModel().currentIndex().row()
-        id = self.queryModel.index(idx,0).data()
+        row=self.tableView.selectionModel().currentIndex().row()
+        id = self.queryModel.index(row,0).data()
         logger.info(id)
-        if idx >= 0:
+        if row >= 0:
             # query = QSqlQuery(self.db)
             # logger.info(query)
 
@@ -402,7 +501,7 @@ class Manager(QDialog,manager_Ui_form):
             if confirm_delete == QMessageBox.StandardButton.Yes:
                 # query = QSqlQuery(self.db)
                 self.query.prepare(f'DELETE FROM users WHERE id ={id}')
-                logger.info(idx)
+                logger.info(row)
                 # query.bindValue(':id', id)
                 logger.info(self.query.lastQuery() )
                 self.query.exec()

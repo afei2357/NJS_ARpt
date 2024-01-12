@@ -30,10 +30,11 @@ class AddDialog(QDialog,add_Ui_Form):
         logger.info('init ')
         if self.data:
             logger.info('set data ')
+            logger.info(self.data)
             self.input_username.setText(str(self.data['username']))
-            self.input_password.setText(str(self.data['password']))
-            self.input_password2.setText(str(self.data['password']))
-            if self.data['password'] == 'manager':
+            # self.input_password.setText(str(self.data['password']))
+            # self.input_password2.setText(str(self.data['password']))
+            if self.data['role'] == 'manager':
                 self.radio_manager.setChecked(True)
             else:
                 self.radio_visitor.setChecked(True)
@@ -230,15 +231,11 @@ class Manager(QDialog,manager_Ui_form):
 
     # ok
     def onAdd(self,data):
-        logger.info('will add ')
         add_dialog = AddDialog(self)
-        logger.info('will add 2')
-        # if add_dialog.exec() == QDialog.accepted(self):
         result = add_dialog.exec()
         logger.info(result)
         logger.info(add_dialog.data)
         if result :
-            logger.info('will add 3')
             self.user_model.add_user(add_dialog.data)
             logger.info('will add 4')
             self.tableView.resizeColumnsToContents()
@@ -255,6 +252,7 @@ class Manager(QDialog,manager_Ui_form):
         logger.info(add_dialog.data)
         if result :
             self.user_model.edit_user(add_dialog.data)
+            logger.info(add_dialog.data)
             self.tableView.resizeColumnsToContents()
 
     # ok
@@ -319,23 +317,6 @@ class Manager(QDialog,manager_Ui_form):
         # logger.info('totalRecrodCount=' + str(self.totalRecrodCount))
         logger.info('totalPage=' + str(self.totalPage))
         self.updateStatus()
-
-
-
-    # 先判断表格是否存在，否则创建表格
-    def ceate_table(self):
-        self.query = QSqlQuery()
-        logger.info('create db ')
-        # # patient_results 只用于保存输入的详细信息
-        # self.query.exec("create table if not exists  patient_results (id integer primary key AUTOINCREMENT ,"
-        #                 "sample_code vchar,"
-        #                 "results vchar)")
-        # users 用于保存输入结果信息和展示给用户看
-        self.query.exec("create table if not exists  users(id integer primary key AUTOINCREMENT ,"
-                        "username vchar, "
-                        "password vchar, "
-                        "role vchar)")
-        logger.info(' fisish create db ')
 
 
     # 得到记录数
@@ -447,7 +428,7 @@ class Manager(QDialog,manager_Ui_form):
 
 
 
-
+    # 不用
     def show_modify_user(self):
         # row = self.tableView.selectedIndexes()
         # name = self.tableView.currentIndex()
@@ -471,7 +452,7 @@ class Manager(QDialog,manager_Ui_form):
                 result = editor.exec()
 
         # self.tableView.setItem(0,0,'aaaa')
-
+    # 不用
     def show_delete_user(self):
         row=self.tableView.selectionModel().currentIndex().row()
         id = self.queryModel.index(row,0).data()
@@ -495,7 +476,7 @@ class Manager(QDialog,manager_Ui_form):
                 #     self.queryModel.setQuery('SELECT * FROM users')
 
     def create_tb(self):
-        create_tb_shell = ' create table if not exists  users(id integer primary key AUTOINCREMENT ,  "username" vchar,"password" vchar,"role" vchar);'
+        create_tb_shell = ' create table if not exists  users(id integer primary key AUTOINCREMENT ,  "username" vchar,"password_hash" vchar,"role" vchar);'
         logging.info('berore before')
         self.query.exec(create_tb_shell)
         logging.info('create')

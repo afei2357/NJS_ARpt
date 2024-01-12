@@ -1,9 +1,32 @@
-import os,sys
+import sys,os
+
+if not os.path.exists('./logs/'):
+    os.makedirs('./logs/')
+
+from UI.Ui_MainWindow import Ui_MainWindow
+from PyQt6.QtSql import  QSqlQueryModel, QSqlQuery,QSqlTableModel,QSqlRecord
+from PyQt6.QtWidgets import *
+from PyQt6.QtSql import QSqlDatabase
+from DataViewCelled import DataViewCelled
+import logging.config
+
 from PyQt6 import QtCore, QtGui, QtWidgets
 if not os.path.exists('./logs/'):
     os.makedirs('./logs/')
 
 from UI.Ui_login import Ui_Form
+from user.user_model import User
+
+
+config_path = './config/logging.ini'
+logging.config.fileConfig(config_path)
+if not os.path.exists(config_path):
+    QMessageBox.warning('文件错误', '配置文件不存在，请检查,本软件自动退出')
+    # return
+
+main_logger = logging.getLogger('main')
+main_logger.info('start ui ')
+
 
 # 账号 管理员-录入者-查询者
 from PyQt6.QtWidgets import *
@@ -27,45 +50,34 @@ class Login( QMainWindow,Ui_Form):
         self.btnLogin.clicked.connect(self.login_data)
         self.btnCancle.clicked.connect(self.cancle_login)
 
-        # self.lbl_report_status.setVisible(False)
-        # self.label_info.setVisible(False)
-        # # self.label_value.setVisible(False)
-        # self.info_file=''
-        # self.value_file=''
-        # self.reports_result=''
-        #
-        # self.db = QSqlDatabase.addDatabase('QSQLITE')
-        # if not os.path.exists('./db'):
-        #     os.makedirs('./db')
+
+        self.db = QSqlDatabase.addDatabase('QSQLITE')
+        if not os.path.exists('./db'):
+            os.makedirs('./db')
 
         # 设置数据库名称
-        # self.db.setDatabaseName('./db/database.db')
-        # # 打开数据库
-        # self.db.open()
-        # self.table_dialog = DataViewCelled(self.db)
+        self.db.setDatabaseName('./db/database.db')
+        # 打开数据库
+        self.db.open()
+        self.table_dialog = DataViewCelled(self.db)
+        self.query = QSqlQuery(self.db)
+        self.create_tb()
+
+    def create_tb(self):
+        create_tb_shell = ' create table if not exists  users(id integer primary key AUTOINCREMENT ,  "username" vchar,"password_hash" vchar,"role" vchar);'
+        logging.info('berore before')
+        self.query.exec(create_tb_shell)
+        logging.info('create tb ')
         #
-        # self.lbl_finish.setWordWrap(True)
-        #
-        # workdir = os.path.abspath(os.path.dirname(__file__))
-        # if not self.reports_result:
-        #     self.reports_result = os.path.join(workdir,'reports_result')
-        #
-        # if not os.path.exists(self.reports_result):
-        #     os.makedirs(self.reports_result)
-        #
-        # if self.info_file and self.value_file:
-        #     self.btnGenerateReport.setEnabled(True)
-        # else:
-        #     self.btnGenerateReport.setEnabled(False)
-        # # btnTestReport 按钮仅用于方便测试，软件发布之后将其设置为不可见。
-        # self.btnTestReport.setVisible(False)
-        # self.btnTestReport.clicked.connect(self.test_generate_report_table)
-        # self.btnShowPatientInfo.clicked.connect(self.show_patient_info)
+
     def login_data(self):
         # self.table_dialog.exec()
-        # 这里可以添加实际的验证逻辑，例如从数据库中验证用户名和密码
-        # 简单示例：如果用户名是'admin'且密码是'password'，则登录成功
-        if self.name.text() == 'a' and self.password.text() == 'a':
+        username = self.name.text()
+        password = self.password.text()
+
+        user = User(self.db)
+        content = user.check_login(username,password)
+        if content :
             # QMessageBox.information(self, '登录成功', '欢迎进入主界面！')
             # 在这里切换到主界面并关闭登录窗口
             self.stacked_widget.setCurrentIndex(1)  # 切换到主界面

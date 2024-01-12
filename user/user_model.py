@@ -26,6 +26,24 @@ class User():
     def set_password(self, password):
         '''设置用户密码，保存为 Hash 值'''
         self.password_hash = generate_password_hash(password)
+        return self.password_hash
+    def check_login(self,username,password):
+        logger.info(username)
+        self.queryModel.setFilter("username ='" + username + "'")
+        if self.queryModel.rowCount() == 0:
+            logger.info(username)
+            return False
+        else:
+            record = self.queryModel.record(0)
+            logger.info(record)
+            logger.info(record.value('username'))
+            password_hash = record.value('password_hash')
+            logger.info(password_hash)
+            if check_password_hash(password_hash,password):
+                return True
+            # else:
+            #     logger.info(username)
+                # return '密码不正确'
 
     def check_password(self, password):
         '''验证密码与保存的 Hash 值是否匹配'''
@@ -47,8 +65,9 @@ class User():
         row = self.queryModel.rowCount()
         self.queryModel.insertRows(row, 1)
         logger.info(data)
+        password_hash = self.set_password(data['password'])
         self.queryModel.setData(self.queryModel.index(row,  1), data['username'])
-        self.queryModel.setData(self.queryModel.index(row,  2), data['password'])
+        self.queryModel.setData(self.queryModel.index(row,  2), password_hash)
         self.queryModel.setData(self.queryModel.index(row,  3), data['role'])
         logger.info(data)
 
@@ -60,17 +79,16 @@ class User():
     def get_data(self,row):
         record = self.queryModel.record(row)
         username = record.value('username')
-        password = record.value('password')
+        password_hash = record.value('password_hash')
         role = record.value('role')
-        data = {"username":username,'password':password,'role':role,"id":id,'row':row }
+        data = {"username":username,'password_hash':password_hash,'role':role,"id":id,'row':row }
         return data
 
     def edit_user(self, data):
         """Add a contact to the database."""
         # rows = self.queryModel.rowCount()
         # id = data['id']
-        print('in edit users 1')
-        print(data)
+        logger.info('edit ')
         # 下面3个代码也可以，只是不那么优雅
         # self.queryModel.setData(self.queryModel.index(int(data['row']),  1), data['username'])
         # self.queryModel.setData(self.queryModel.index(data['row'],  2), data['password'])
@@ -78,12 +96,20 @@ class User():
         # 使用如下来替代：
         row = data['row']
         record = self.queryModel.record(row)
+        logger.info('edit ')
         record.setValue('username', data['username'])
-        record.setValue('password', data['password'])
+        logger.info('edit ')
+        password_hash = self.set_password(data['password'])
+        logger.info('edit ')
+        record.setValue('password_hash', password_hash)
+        logger.info('edit ')
         record.setValue('role', data['role'])
+        logger.info('edit ')
         self.queryModel.setRecord(row,record)
+        logger.info('edit ')
 
         self.queryModel.submitAll()
+        logger.info('edit ')
         self.queryModel.select()
 
 
